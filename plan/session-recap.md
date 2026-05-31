@@ -128,25 +128,25 @@ Falls back to existing widget-based progress when not provided
 
 ## Next steps
 
-### Ready now
+### Execution order
 
-| # | Task | Effort | Description |
-|---|------|--------|-------------|
-| 22 | Fix linting-stack skill | Small | `import-alias` documented as built-in oxlint plugin — it's actually `@limegrass/eslint-plugin-import-alias` via `jsPlugins`. Quick fix in chezmoi source at `~/.agents/skills/linting-stack/`. |
-| 23 | Create scaffold skill | Medium | Reusable VSH Pi extension scaffold: mise.toml, lefthook.yml, .oxlintrc.json, biome.json, tsconfig.json, AGENTS.md/CLAUDE.md patterns. For all pi-ecosystem repos. |
+| Order | # | Task | Effort | Description |
+|-------|---|------|--------|-------------|
+| 1 | 22 | Fix linting-stack skill | Small | `import-alias` documented as built-in oxlint plugin — it's actually `@limegrass/eslint-plugin-import-alias` via `jsPlugins`. Quick fix in chezmoi source at `~/.agents/skills/linting-stack/`. |
+| 2 | 23 | Create scaffold skill | Medium | Reusable VSH Pi extension scaffold: mise.toml, lefthook.yml, .oxlintrc.json, biome.json, tsconfig.json, AGENTS.md/CLAUDE.md patterns. For all pi-ecosystem repos. |
+| 3 | 16 | Update TS type-safety + linting skills | Medium | Missing guidance discovered this session. Done together with #22 since both are chezmoi-managed skill updates. |
+| 4 | 6 | Sanitize + publish to npm | Medium | Needs history rewrite (secrets), GitHub repo creation, npm publish. Done after skill updates so published repo has correct tooling docs. |
 
 ### Deferred
 
 | # | Task | Notes |
 |---|------|-------|
-| 6 | Sanitize + publish to npm | Needs history rewrite (secrets), GitHub repo creation, npm publish |
 | 13 | Use probe tools for verification | Replace `node -e` scripts with probe_eval in tests |
-| 16 | Update TS type-safety + linting skills | Missing guidance discovered this session |
 | 18 | Evaluate pi-components SettingsPanel | For command.ts TUI panel refactor |
 | 19 | Integration tests | Local qualitative compaction validation |
 
-### Open concerns
+### Resolved this session
 
-- **Biome test warnings** — 13 `noNonNullAssertion` warnings. Downgraded to warn, not blocking.
-- **`_emit` for idle-path `sendCustomMessage`** — `pi.on('message_end')` doesn't fire synchronously for custom messages. Not a blocker (we use `session_compact`).
-- **`examples/templates/` is a copy** not symlink of `src/template/templates/` — needs DRY-up if partials diverge.
+- ✅ **Biome test warnings** — all 13 eliminated. `noNonNullAssertion` replaced with explicit null guards, `noExplicitAny` replaced with `Record<string, unknown>` or typed assertions. Zero warnings now.
+- ✅ **`examples/templates/` duplication** — replaced with symlink to `src/template/templates/`. Single source of truth, tests pass.
+- ℹ️ **`_emit` for idle-path `sendCustomMessage`** — not a concern for the streaming implementation. `chat-message.ts` uses `pi.sendMessage()` (the public API) which fires during the compaction handler's `start()` call. The `session_compact` hook handles cleanup. The streaming path is fully wired: `start()` → `sendMessage` → `update()` → dual mutation + `requestRender` → `finish()` → phase transition. No idle-path edge case applies.
