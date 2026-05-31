@@ -132,10 +132,28 @@ Falls back to existing widget-based progress when not provided
 
 | Order | # | Task | Effort | Description |
 |-------|---|------|--------|-------------|
-| 1 | 22 | Fix linting-stack skill | Small | `import-alias` documented as built-in oxlint plugin — it's actually `@limegrass/eslint-plugin-import-alias` via `jsPlugins`. Quick fix in chezmoi source at `~/.agents/skills/linting-stack/`. |
-| 2 | 23 | Create scaffold skill | Medium | Reusable VSH Pi extension scaffold: mise.toml, lefthook.yml, .oxlintrc.json, biome.json, tsconfig.json, AGENTS.md/CLAUDE.md patterns. For all pi-ecosystem repos. |
-| 3 | 16 | Update TS type-safety + linting skills | Medium | Missing guidance discovered this session. Done together with #22 since both are chezmoi-managed skill updates. |
+| 1 | 22 | Fix linting-stack skill | Small | `import-alias` documented as built-in oxlint plugin — it's actually `@limegrass/eslint-plugin-import-alias` via `jsPlugins`. Edit chezmoi source for `~/.agents/skills/linting-stack/`, diff, apply. |
+| 2 | 23 | Create `pi-extension-scaffold` skill | Medium | See checklist below. |
+| 3 | 16 | Update TS type-safety + linting skills | Medium | Missing guidance discovered this session. Edit chezmoi source for both skills, diff, apply. Done together with #22 since both are chezmoi-managed. |
 | 4 | 6 | Sanitize + publish to npm | Medium | Needs history rewrite (secrets), GitHub repo creation, npm publish. Done after skill updates so published repo has correct tooling docs. |
+
+#### `pi-extension-scaffold` skill (#23) — checklist
+
+Name: **`pi-extension-scaffold`** (chezmoi-managed at `~/.agents/skills/pi-extension-scaffold/`)
+
+Scaffolds a new VSH Pi extension project with canonical tooling:
+
+- [ ] `mise.toml` — Node 24, pnpm 11.2.2
+- [ ] `lefthook.yml` — pre-commit (format + lint + typecheck), commit-msg (commitlint)
+- [ ] `.oxlintrc.json` — `plugins: ["typescript"]`, type-aware rules, `jsPlugins` for import-alias
+- [ ] `biome.json` — tabs, single quotes, 100-col, test overrides
+- [ ] `tsconfig.json` — strict, strip-only TS, `lib: ["ES2023"]`, path aliases
+- [ ] `package.json` — `pi.extensions`, `files`, `engines`, `packageManager`, peer deps
+- [ ] `vitest.config.ts` — path alias resolution
+- [ ] `AGENTS.md` + `CLAUDE.md` shims — root + nested subdirs
+- [ ] `.commitlintrc.yml` — conventional commits
+- [ ] `.changeset/config.json` — changesets for versioning
+- [ ] `.github/workflows/` — CI + release workflows (VSH baseline)
 
 ### Deferred
 
