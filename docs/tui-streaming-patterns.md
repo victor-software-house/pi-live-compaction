@@ -134,7 +134,7 @@ const entryId = entry?.id;  // save for later
 // At finish time — getEntry returns the same mutable object (verified)
 function finish(text: string) {
   phase = 'done';
-  boxRef?.setBgFn((t) => theme.bg('toolSuccessBg', t));
+  boxRef?.setBgFn((t) => theme.bg('customMessageBg', t));
   update(text);
 
   // Hide from rebuild — compaction_end triggers rebuildChatFromMessages
@@ -167,9 +167,8 @@ pattern that Pi documents for session state persistence via `appendEntry` /
 | Color key | Use |
 |---|---|
 | `toolPendingBg` | During streaming (same as in-progress tool calls) |
-| `toolSuccessBg` | Completed successfully |
+| `customMessageBg` | Completed / done (same as Pi's native compaction summary) |
 | `toolErrorBg` | Failed |
-| `customMessageBg` | Pi's built-in custom/compaction messages |
 
 These are `theme.bg()` keys. Actual colors depend on the active theme.
 Use `theme.bg('toolPendingBg', text)` — never hardcode RGB values.
