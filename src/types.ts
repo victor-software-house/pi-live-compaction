@@ -92,4 +92,5 @@ export type RunDeps = {
 	resolvePaths: typeof resolveLiveCompactionPaths;
 	fetchTaskState?: () => Promise<string | undefined> | string | undefined;
 	appendEntry?: AppendEntry;
+	makeProgress?: (ctx: HookContext) => SummaryProgress | undefined;
 };

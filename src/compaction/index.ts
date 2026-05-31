@@ -1,3 +1,4 @@
+export { registerCompactionChatMessage } from '@live-compaction/compaction/chat-message';
 export {
 	DEFAULT_DEPS,
 	fetchTaskStateSnapshot,

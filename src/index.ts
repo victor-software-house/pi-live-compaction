@@ -7,6 +7,7 @@ import {
 	fetchTaskStateSnapshot,
 	runLiveCompaction,
 } from '@live-compaction/compaction';
+import { registerCompactionChatMessage } from '@live-compaction/compaction/chat-message';
 
 // ---------------------------------------------------------------------------
 // Re-exports for external consumers
@@ -59,12 +60,14 @@ export {
 
 export default function liveCompactionExtension(pi: ExtensionAPI): void {
 	registerLiveCompactionCommand(pi);
+	const makeChatProgress = registerCompactionChatMessage(pi);
 
 	pi.on('session_before_compact', async (event, ctx) => {
 		return runLiveCompaction(event, ctx, {
 			...DEFAULT_DEPS,
 			fetchTaskState: () => fetchTaskStateSnapshot(pi.events),
 			appendEntry: pi.appendEntry.bind(pi),
+			makeProgress: makeChatProgress,
 		});
 	});
 

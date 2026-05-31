@@ -106,7 +106,7 @@ export async function runLiveCompaction(
 		}
 		const notifyHook = (message: string, level: Parameters<typeof notify>[2]) =>
 			notify(ctx, message, level);
-		const progress = makeSummaryProgress(ctx);
+		const progress = deps.makeProgress?.(ctx) ?? makeSummaryProgress(ctx);
 
 		if (template?.frontmatter.preset && !parsedInstructions.usesPresetDirective) {
 			parsedInstructions.usesPresetDirective = true;
