@@ -25,8 +25,13 @@ content in the chat flow is via `pi.sendMessage()` + `pi.registerMessageRenderer
 
 ### 1. Capture TUI ref
 
-Widget factory `(tui, theme) => Component` is the **only** source for the TUI
-instance. Capture it from a throwaway widget:
+All factory-based UI APIs pass the TUI instance: `setWidget`, `setFooter`,
+and `custom()` all receive `(tui, theme, ...)`. This is documented in
+Pi's `tui.md` (Pattern 6: Custom Footer shows `tui.requestRender()` directly).
+
+The message renderer API does NOT receive `tui` — only `(message, options, theme)`.
+To use `tui.requestRender()` from a message renderer context, capture the ref
+from any factory-based API:
 
 ```typescript
 let TUI: TUI | undefined;
@@ -35,6 +40,7 @@ setTimeout(() => ctx.ui.setWidget('_cap', undefined), 100);
 ```
 
 The TUI ref is a session-lifetime singleton. Never stale. Safe to keep.
+The `setFooter` factory is an equally valid capture source.
 
 ### 2. Register message renderer
 
@@ -120,7 +126,7 @@ function finish(text: string) {
   boxRef?.setBgFn((t) => theme.bg('toolSuccessBg', t));
   update(text);
 
-  // Mark entry for removal on next rebuild
+  // Hide from rebuild — compaction_end triggers rebuildChatFromMessages
   const entries = ctx.sessionManager.getEntries();
   const ours = [...entries].reverse()
     .find(e => e.type === 'custom_message' && e.customType === customType);
@@ -131,6 +137,12 @@ function finish(text: string) {
 Setting `display = undefined` hides the message when `rebuildChatFromMessages()`
 runs. This happens automatically on `compaction_end`. Pi's built-in
 `CompactionSummaryMessageComponent` then takes over.
+
+**Precedent:** Pi's official examples (`snake.ts`, `tools.ts`, `preset.ts`)
+use `getEntries()` to read and act on live entry objects. The returned entries
+are mutable plain objects — not frozen or cloned. Our `display` mutation follows
+the same entry access pattern that Pi documents for session state persistence
+via `appendEntry` / `getEntries()` (see `extensions.md` § pi.appendEntry).
 
 ## Theme Colors
 
