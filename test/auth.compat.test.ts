@@ -134,7 +134,7 @@ describe('registered provider request compatibility', () => {
 			} as never,
 		);
 
-		expect('compaction' in result!).toBe(true);
+		expect(result != null && 'compaction' in result).toBe(true);
 		if (!result || !('compaction' in result)) throw new Error('expected compaction');
 		expect(result.compaction.summary).toBe('summary from provider stream');
 		expect(streamSimpleCalled).toBe(true);
@@ -246,7 +246,7 @@ describe('registered provider request compatibility', () => {
 			} as never,
 		);
 
-		expect('compaction' in result!).toBe(true);
+		expect(result != null && 'compaction' in result).toBe(true);
 		if (!result || !('compaction' in result)) throw new Error('expected compaction');
 		expect(result.compaction.summary).toBe('partial summary final');
 		expect(widgetCalls.some((content) => typeof content === 'function')).toBe(true);
@@ -332,7 +332,7 @@ describe('registered provider request compatibility', () => {
 			} as never,
 		);
 
-		expect('compaction' in result!).toBe(true);
+		expect(result != null && 'compaction' in result).toBe(true);
 		if (!result || !('compaction' in result)) throw new Error('expected compaction');
 		expect(result.compaction.summary).toBe('fantastic partial summary');
 	});
@@ -421,7 +421,7 @@ describe('registered provider request compatibility', () => {
 			} as never,
 		);
 
-		expect('compaction' in result!).toBe(true);
+		expect(result != null && 'compaction' in result).toBe(true);
 		if (!result || !('compaction' in result)) throw new Error('expected compaction');
 		expect(result.compaction.summary).toBe('summary before error event');
 	});
@@ -517,7 +517,7 @@ describe('registered provider request compatibility', () => {
 			} as never,
 		);
 
-		expect('compaction' in result!).toBe(true);
+		expect(result != null && 'compaction' in result).toBe(true);
 		if (!result || !('compaction' in result)) throw new Error('expected compaction');
 		expect(result.compaction.summary).toBe('default stream final');
 		expect(defaultStreamCalled).toBe(true);
@@ -527,7 +527,7 @@ describe('registered provider request compatibility', () => {
 
 	it('forces SSE for Codex Responses compaction calls', async () => {
 		let capturedOptions: Record<string, unknown> | undefined;
-		const appendedEntries: Array<{ customType: string; data: any }> = [];
+		const appendedEntries: Array<{ customType: string; data: Record<string, unknown> }> = [];
 
 		const result = await runLiveCompaction(
 			{
@@ -588,12 +588,12 @@ describe('registered provider request compatibility', () => {
 					project: undefined,
 				}),
 				appendEntry: (customType: string, data: unknown) => {
-					appendedEntries.push({ customType, data });
+					appendedEntries.push({ customType, data: data as Record<string, unknown> });
 				},
 			} as never,
 		);
 
-		expect('compaction' in result!).toBe(true);
+		expect(result != null && 'compaction' in result).toBe(true);
 		if (!result || !('compaction' in result)) throw new Error('expected compaction');
 		expect(result.compaction.summary).toBe('codex summary');
 		expect(capturedOptions).toMatchObject({ transport: 'sse' });
@@ -616,7 +616,15 @@ describe('registered provider request compatibility', () => {
 			tokensBefore: 123,
 			firstKeptEntryId: 'm1',
 		});
-		const requestEntry = appendedEntries[1].data;
+		const requestEntry = appendedEntries[1].data as {
+			systemPrompt: string;
+			renderedPrompt: string;
+			systemPromptChars: number;
+			promptChars: number;
+			renderedPromptChars: number;
+			systemPromptSha256: string;
+			renderedPromptSha256: string;
+		};
 		expect(requestEntry.systemPrompt).toBe(SYSTEM_PROMPT);
 		expect(requestEntry.renderedPrompt).toContain('<focus>\nkeep focus text\n</focus>');
 		expect(requestEntry.systemPromptChars).toBe(SYSTEM_PROMPT.length);
@@ -690,7 +698,7 @@ describe('registered provider request compatibility', () => {
 			} as never,
 		);
 
-		expect('compaction' in result!).toBe(true);
+		expect(result != null && 'compaction' in result).toBe(true);
 		if (!result || !('compaction' in result)) throw new Error('expected compaction');
 		expect(result.compaction.summary).toBe('non-codex summary');
 		expect(capturedOptions).not.toHaveProperty('transport');

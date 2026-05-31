@@ -54,7 +54,8 @@ const model = {
 async function renderCompactionTemplate(templatePath: string): Promise<string> {
 	const template = await loadCompactionTemplate(templatePath);
 	expect(template, templatePath).not.toBeNull();
-	return template!.render(
+	if (!template) throw new Error(`template unexpectedly null: ${templatePath}`);
+	return template.render(
 		buildRenderVars({
 			previousSummary: 'old prior constraints',
 			discardedText: sampleText,
@@ -65,7 +66,7 @@ async function renderCompactionTemplate(templatePath: string): Promise<string> {
 			focusInput: '/compact validate all prompt surfaces',
 			discardedMessages: sampleMessages,
 			keptTailMessages: sampleMessages,
-			frontmatter: template!.frontmatter,
+			frontmatter: template.frontmatter,
 		}) as unknown as Record<string, unknown>,
 	);
 }
@@ -73,13 +74,14 @@ async function renderCompactionTemplate(templatePath: string): Promise<string> {
 async function renderBranchSummaryTemplate(templatePath: string): Promise<string> {
 	const template = await loadCompactionTemplate(templatePath);
 	expect(template, templatePath).not.toBeNull();
-	return template!.render(
+	if (!template) throw new Error(`template unexpectedly null: ${templatePath}`);
+	return template.render(
 		buildBranchSummaryRenderVars({
 			branchMessagesText: sampleText,
 			filesTouchedBlock,
 			customFocus: 'branch focus',
 			branchEntryMessages: sampleMessages,
-			frontmatter: template!.frontmatter,
+			frontmatter: template.frontmatter,
 		}) as unknown as Record<string, unknown>,
 	);
 }
@@ -232,9 +234,10 @@ describe('prompt/template surfaces', () => {
 				},
 			} as never,
 			{
-				complete: async (_model: unknown, context: any) => {
-					capturedSystemPrompt = context.systemPrompt;
-					capturedPromptBody = context.messages[0].content[0].text;
+				complete: async (_model: unknown, context: Record<string, unknown>) => {
+					capturedSystemPrompt = context.systemPrompt as string;
+					const messages = context.messages as Array<{ content: Array<{ text: string }> }>;
+					capturedPromptBody = messages[0].content[0].text;
 					return {
 						role: 'assistant',
 						content: [{ type: 'text', text: 'summary' }],
