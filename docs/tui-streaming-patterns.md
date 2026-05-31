@@ -126,9 +126,8 @@ directly — no ID tracking needed (only one live message per compaction):
 
 ```typescript
 pi.on('session_compact', (_event, ctx) => {
-  const entries = ctx.sessionManager.getEntries();
-  const entry = [...entries].reverse()
-    .find(e => e.type === 'custom_message' && e.customType === CUSTOM_TYPE);
+  const entry = ctx.sessionManager.getEntries()
+    .findLast(e => e.type === 'custom_message' && e.customType === CUSTOM_TYPE);
   if (entry) entry.display = undefined;
 });
 ```
