@@ -120,17 +120,28 @@ pi.events.on('live-compaction:done', ({ text }) => finish(text));
 
 ### 7. Cleanup on finish
 
+Track the entry ID at send time, mutate by ID at cleanup time:
+
 ```typescript
+// At send time — sendMessage is synchronous when not streaming,
+// so the entry exists immediately after the call
+pi.sendMessage({ customType, content: '...', display: true });
+const entries = ctx.sessionManager.getEntries();
+const entry = [...entries].reverse()
+  .find(e => e.type === 'custom_message' && e.customType === customType);
+const entryId = entry?.id;  // save for later
+
+// At finish time — getEntry returns the same mutable object (verified)
 function finish(text: string) {
   phase = 'done';
   boxRef?.setBgFn((t) => theme.bg('toolSuccessBg', t));
   update(text);
 
   // Hide from rebuild — compaction_end triggers rebuildChatFromMessages
-  const entries = ctx.sessionManager.getEntries();
-  const ours = [...entries].reverse()
-    .find(e => e.type === 'custom_message' && e.customType === customType);
-  if (ours) ours.display = undefined;
+  if (entryId) {
+    const entry = ctx.sessionManager.getEntry(entryId);
+    if (entry) entry.display = undefined;
+  }
 }
 ```
 
@@ -138,11 +149,18 @@ Setting `display = undefined` hides the message when `rebuildChatFromMessages()`
 runs. This happens automatically on `compaction_end`. Pi's built-in
 `CompactionSummaryMessageComponent` then takes over.
 
+**Why this is safe:**
+- `getEntry(id)` returns the same live object reference as `getEntries()` —
+  confirmed via identity check (`===`). No cloning, no freezing.
+- Lookup by ID is branch-safe: the entry ID is stable across the session tree.
+- We only mutate `display`, a rendering hint. We never insert or remove entries
+  from the session tree — that would break the parent/child chain.
+
 **Precedent:** Pi's official examples (`snake.ts`, `tools.ts`, `preset.ts`)
 use `getEntries()` to read and act on live entry objects. The returned entries
-are mutable plain objects — not frozen or cloned. Our `display` mutation follows
-the same entry access pattern that Pi documents for session state persistence
-via `appendEntry` / `getEntries()` (see `extensions.md` § pi.appendEntry).
+are mutable plain objects. Our `display` mutation follows the same entry access
+pattern that Pi documents for session state persistence via `appendEntry` /
+`getEntries()` (see `extensions.md` § pi.appendEntry).
 
 ## Theme Colors
 
