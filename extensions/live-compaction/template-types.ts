@@ -7,7 +7,7 @@
 
 import type { Message } from '@earendil-works/pi-ai';
 
-import type { ThinkingLevel } from './config';
+import type { ThinkingLevel } from '@live-compaction/config';
 
 export interface CompactionTemplateFrontmatter {
 	preset?: string;

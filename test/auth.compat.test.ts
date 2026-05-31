@@ -1,9 +1,8 @@
-import { describe, expect, it } from 'vitest';
-
 import { COMPACTION_ATTEMPT_CUSTOM_TYPE } from '@live-compaction/attempt-entry';
 import { DEFAULT_CONFIG } from '@live-compaction/config';
 import { runLiveCompaction } from '@live-compaction/index';
 import { SYSTEM_PROMPT } from '@live-compaction/summary-stream';
+import { describe, expect, it } from 'vitest';
 
 const model = {
 	provider: 'custom-provider',

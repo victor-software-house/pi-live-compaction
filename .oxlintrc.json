@@ -1,46 +1,51 @@
 {
 	"$schema": "./node_modules/oxlint/configuration_schema.json",
-	"categories": {
-		"correctness": "error",
-		"perf": "error",
-		"restriction": "off",
-		"style": "warn",
-		"suspicious": "error",
-		"pedantic": "off",
-		"nursery": "off"
-	},
-	"plugins": ["typescript", "unicorn", "import", "promise", "node", "oxc", "import-alias"],
+	"plugins": ["typescript"],
+	"jsPlugins": [
+		{
+			"name": "@limegrass/import-alias",
+			"specifier": "@limegrass/eslint-plugin-import-alias"
+		}
+	],
 	"rules": {
-		"no-console": "warn",
-		"import/no-default-export": "error",
-		"import/no-cycle": "error",
-		"import-alias/no-relative-paths": "error",
+		"no-continue": "off",
+		"max-statements": "off",
+		"no-magic-numbers": "off",
+		"typescript/no-floating-promises": "error",
+		"typescript/no-misused-promises": "error",
+		"typescript/no-deprecated": "error",
+		"typescript/await-thenable": "error",
+		"typescript/strict-boolean-expressions": "error",
+		"typescript/consistent-type-assertions": "error",
+		"typescript/no-unnecessary-type-assertion": "error",
+		"typescript/no-unsafe-type-assertion": "error",
+		"typescript/no-unsafe-assignment": "error",
+		"typescript/no-unsafe-call": "error",
+		"typescript/no-unsafe-member-access": "error",
+		"typescript/no-unsafe-return": "error",
+		"typescript/no-unsafe-argument": "error",
 		"typescript/no-explicit-any": "error",
 		"typescript/no-non-null-assertion": "error",
 		"typescript/consistent-type-imports": "error",
 		"typescript/no-unused-vars": "error",
-		"unicorn/prefer-node-protocol": "error",
-		"unicorn/no-null": "off",
-		"promise/always-return": "error",
-		"promise/no-return-wrap": "error"
-	},
-	"settings": {
-		"import-alias/aliases": {
-			"@live-compaction": "./extensions/live-compaction"
-		}
+		"@limegrass/import-alias/import-alias": "error"
 	},
 	"overrides": [
 		{
 			"files": ["**/*.test.ts", "**/*.spec.ts", "**/test/**"],
 			"rules": {
-				"no-console": "off",
-				"typescript/no-non-null-assertion": "off"
+				"typescript/no-non-null-assertion": "off",
+				"typescript/no-explicit-any": "off",
+				"typescript/no-unsafe-assignment": "off",
+				"typescript/no-unsafe-call": "off",
+				"typescript/no-unsafe-member-access": "off",
+				"typescript/no-unsafe-return": "off",
+				"typescript/no-unsafe-argument": "off"
 			}
 		},
 		{
 			"files": ["**/*.config.ts", "**/*.config.mjs", "commitlint.config.mjs"],
 			"rules": {
-				"import/no-default-export": "off",
 				"no-console": "off"
 			}
 		}

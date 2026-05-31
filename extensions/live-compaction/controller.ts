@@ -18,7 +18,7 @@ import {
 	saveScopedPromptText,
 	scopeHasLocalOverrides,
 	type ThinkingLevel,
-} from './config';
+} from '@live-compaction/config';
 
 export interface RuntimeStatus {
 	available: boolean;

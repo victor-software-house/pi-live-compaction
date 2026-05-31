@@ -8,10 +8,8 @@
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-
-import { describe, expect, it } from 'vitest';
-
 import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
+import { describe, expect, it } from 'vitest';
 
 async function withTemplate(body: string): Promise<string> {
 	const dir = await mkdtemp(path.join(tmpdir(), 'gc-helpers-'));

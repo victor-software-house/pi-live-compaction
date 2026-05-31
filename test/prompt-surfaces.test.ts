@@ -3,10 +3,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { convertToLlm, getAgentDir, serializeConversation } from '@earendil-works/pi-coding-agent';
-import { describe, expect, it } from 'vitest';
+import { DEFAULT_CONFIG } from '@live-compaction/config';
 
 import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
-import { DEFAULT_CONFIG } from '@live-compaction/config';
 import { fetchTaskStateSnapshot, runLiveCompaction } from '@live-compaction/index';
 import { SYSTEM_PROMPT } from '@live-compaction/summary-stream';
 import {
@@ -15,6 +14,7 @@ import {
 	loadCompactionTemplate,
 	loadCompactionTemplateFromString,
 } from '@live-compaction/template';
+import { describe, expect, it } from 'vitest';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = path.join(__dirname, '..');

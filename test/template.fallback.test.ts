@@ -8,8 +8,6 @@
  * engine as on-disk templates.
  */
 
-import { describe, expect, it } from 'vitest';
-
 import {
 	DEFAULT_BRANCH_SUMMARY_TEMPLATE_BODY,
 	DEFAULT_COMPACTION_TEMPLATE_BODY,
@@ -19,6 +17,7 @@ import {
 	buildRenderVars,
 	loadCompactionTemplateFromString,
 } from '@live-compaction/template';
+import { describe, expect, it } from 'vitest';
 
 describe('DEFAULT_COMPACTION_TEMPLATE_BODY', () => {
 	const tpl = loadCompactionTemplateFromString(DEFAULT_COMPACTION_TEMPLATE_BODY, {

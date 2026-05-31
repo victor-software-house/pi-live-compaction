@@ -21,7 +21,7 @@ import {
 	renderExample,
 	shouldUpdate,
 	writeExpected,
-} from './example-runner';
+} from '@test/example-runner';
 
 const EXAMPLES_ROOT = path.join(__dirname, '..', 'examples');
 

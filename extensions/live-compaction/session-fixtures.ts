@@ -169,7 +169,7 @@ export function buildSessionFixture(input: BuildFixtureInput): SessionFixture {
 			message: m,
 		} satisfies SessionMessageEntry);
 	}
-	const firstKeptId = input.keptTail.length ? `kept-0` : undefined;
+	const firstKeptId = input.keptTail.length > 0 ? `kept-0` : undefined;
 	let j = 0;
 	for (const m of input.keptTail) {
 		branchEntries.push({

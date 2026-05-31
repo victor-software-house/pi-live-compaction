@@ -15,16 +15,26 @@ import {
 	Text,
 } from '@earendil-works/pi-tui';
 
-import type { ConfigScope, PanelScope, PresetConfig, PromptKind, PromptResolution } from './config';
-import { CURRENT_PRESET_SENTINEL, loadEffectiveConfig, PANEL_SCOPE_VALUES } from './config';
-import type { LiveCompactionController, LiveCompactionState } from './controller';
+import type {
+	ConfigScope,
+	PanelScope,
+	PresetConfig,
+	PromptKind,
+	PromptResolution,
+} from '@live-compaction/config';
+import {
+	CURRENT_PRESET_SENTINEL,
+	loadEffectiveConfig,
+	PANEL_SCOPE_VALUES,
+} from '@live-compaction/config';
+import type { LiveCompactionController, LiveCompactionState } from '@live-compaction/controller';
 import {
 	buildPresetChoices,
 	createLiveCompactionController,
 	formatThinkingLevel,
 	getPresetNames,
 	parseThinkingLevelSelection,
-} from './controller';
+} from '@live-compaction/controller';
 
 const COMMAND_NAME = 'live-compaction';
 const SUBCOMMANDS = ['show', 'verify', 'path', 'reset', 'help'];

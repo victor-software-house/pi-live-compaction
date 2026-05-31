@@ -1,13 +1,17 @@
-import {
-	type AssistantMessage,
-	type AssistantMessageEvent,
-	type Context,
-	type Message,
-	type SimpleStreamOptions,
+import type {
+	AssistantMessage,
+	AssistantMessageEvent,
+	Context,
+	Message,
+	SimpleStreamOptions,
 } from '@earendil-works/pi-ai';
-
-import type { ReasoningLevel, ResolvedSummarizer, RunDeps, SummaryProgress } from './runtime-types';
-import type { ThinkingLevel } from './config';
+import type { ThinkingLevel } from '@live-compaction/config';
+import type {
+	ReasoningLevel,
+	ResolvedSummarizer,
+	RunDeps,
+	SummaryProgress,
+} from '@live-compaction/runtime-types';
 
 export const SYSTEM_PROMPT = [
 	'You are generating a structured compaction summary for a later LLM to continue the work.',

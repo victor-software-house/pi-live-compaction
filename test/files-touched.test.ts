@@ -11,13 +11,12 @@
  * label.
  */
 
-import { describe, expect, it } from 'vitest';
-
 import type { FilesTouchedEntry } from '@live-compaction/files-touched';
 import {
 	formatManifestOperations,
 	renderFilesTouchedManifestBlock,
 } from '@live-compaction/files-touched-manifest';
+import { describe, expect, it } from 'vitest';
 
 function entry(
 	displayPath: string,

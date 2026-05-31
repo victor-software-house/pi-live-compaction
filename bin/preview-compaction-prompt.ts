@@ -22,16 +22,13 @@ import process from 'node:process';
 
 import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
 
-import {
-	collectFilesTouched,
-	type FilesTouchedEntry,
-} from '@live-compaction/files-touched';
+import { collectFilesTouched, type FilesTouchedEntry } from '@live-compaction/files-touched';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import {
 	collectDiscardedFromFixture,
 	collectKeptTailFromFixture,
 	loadSessionFixtureFromJsonl,
 } from '@live-compaction/session-fixtures';
-import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
 
 interface Args {
@@ -126,12 +123,10 @@ async function main(): Promise<void> {
 	const discardedMessages = collectDiscardedFromFixture(fixture);
 	const keptTailMessages = collectKeptTailFromFixture(fixture);
 
-	const discardedText = discardedMessages.length
-		? serializeConversation(convertToLlm(discardedMessages))
-		: '';
-	const keptTailText = keptTailMessages.length
-		? serializeConversation(convertToLlm(keptTailMessages))
-		: '';
+	const discardedText =
+		discardedMessages.length > 0 ? serializeConversation(convertToLlm(discardedMessages)) : '';
+	const keptTailText =
+		keptTailMessages.length > 0 ? serializeConversation(convertToLlm(keptTailMessages)) : '';
 
 	let filesTouchedBlock: string | undefined;
 	if (args.includeFilesTouched) {

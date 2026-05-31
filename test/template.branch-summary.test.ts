@@ -10,13 +10,8 @@
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-
+import { buildBranchSummaryRenderVars, loadCompactionTemplate } from '@live-compaction/template';
 import { describe, expect, it } from 'vitest';
-
-import {
-	buildBranchSummaryRenderVars,
-	loadCompactionTemplate,
-} from '@live-compaction/template';
 
 describe('branch-summary template (custom on-disk)', () => {
 	it('loads, parses, and renders against branch-summary render vars', async () => {
@@ -65,7 +60,7 @@ describe('branch-summary template (custom on-disk)', () => {
 			],
 		});
 
-		const out = tpl!.render(vars as unknown as Record<string, unknown>);
+		const out = tpl?.render(vars as unknown as Record<string, unknown>);
 
 		expect(out).toContain('<branch-messages>');
 		expect(out).toContain('[User]: investigate approach B');
@@ -87,7 +82,7 @@ describe('branch-summary template (custom on-disk)', () => {
 		const vars = buildBranchSummaryRenderVars({
 			branchEntryMessages: [],
 		});
-		const out = tpl!.render(vars as unknown as Record<string, unknown>).trim();
+		const out = tpl?.render(vars as unknown as Record<string, unknown>).trim();
 
 		// {% xml %} swallows empty bodies
 		expect(out).toBe('');

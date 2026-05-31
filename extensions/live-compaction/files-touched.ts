@@ -105,7 +105,7 @@ function stripReadSliceSuffix(value: string): string {
 	return value.replace(/:(\d+)-(\d+)$/, '');
 }
 
-function firstDefinedString(...values: Array<unknown>): string | null {
+function firstDefinedString(...values: unknown[]): string | null {
 	for (const value of values) {
 		if (typeof value === 'string' && value.length > 0) {
 			return value;
@@ -787,7 +787,7 @@ function parseBashActions(cmd: string): FileTrackingAction[] {
 
 		if (command[0] === 'patch') {
 			const operands = extractShellOperands(command.slice(1));
-			if (operands.length >= 1) {
+			if (operands.length > 0) {
 				actions.push({ kind: 'touch', path: operands[0], operation: 'edit' });
 			}
 			continue;

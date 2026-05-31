@@ -7,9 +7,8 @@
  * Both round-trip through parseConfig and validate aggressively.
  */
 
-import { describe, expect, it } from 'vitest';
-
 import { DEFAULT_CONFIG, parseConfig } from '@live-compaction/config';
+import { describe, expect, it } from 'vitest';
 
 describe('config defaults', () => {
 	it("ships defaultPanelScope='global' and inheritSessionModel=false", () => {

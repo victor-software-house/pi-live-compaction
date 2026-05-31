@@ -2,8 +2,8 @@ import { createHash, randomUUID } from 'node:crypto';
 
 import {
 	completeSimple,
-	streamSimple as streamSimpleDefault,
 	type Message,
+	streamSimple as streamSimpleDefault,
 } from '@earendil-works/pi-ai';
 import {
 	CompactionSummaryMessageComponent,
@@ -14,11 +14,8 @@ import {
 	type SessionEntry,
 	serializeConversation,
 } from '@earendil-works/pi-coding-agent';
-import { collectFilesTouched, type FilesTouchedEntry } from './files-touched';
-import { renderFilesTouchedManifestBlock } from './files-touched-manifest';
-import { appendCompactionAttemptEntry } from './attempt-entry';
-import { CompactionAbortedError, isAbortError } from './errors';
-import { registerLiveCompactionCommand } from './command';
+import { appendCompactionAttemptEntry } from '@live-compaction/attempt-entry';
+import { registerLiveCompactionCommand } from '@live-compaction/command';
 import {
 	CURRENT_PRESET_SENTINEL,
 	DEFAULT_BRANCH_SUMMARY_TEMPLATE_BODY,
@@ -29,13 +26,15 @@ import {
 	loadEffectiveConfig,
 	normalizeOptionalText,
 	normalizeThinkingLevel,
-	type PresetConfig,
 	resolveLiveCompactionPaths,
 	type ThinkingLevel,
-} from './config';
+} from '@live-compaction/config';
+import { CompactionAbortedError, isAbortError } from '@live-compaction/errors';
+import { collectFilesTouched } from '@live-compaction/files-touched';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import type {
-	LiveCompactionDetails,
 	HookContext,
+	LiveCompactionDetails,
 	NotifyLevel,
 	ParsedCompactInstructions,
 	PreparedMessages,
@@ -44,7 +43,7 @@ import type {
 	RunDeps,
 	StreamSimple,
 	SummaryProgress,
-} from './runtime-types';
+} from '@live-compaction/runtime-types';
 import {
 	buildSummaryOptions,
 	buildSummaryRequestMessage,
@@ -53,26 +52,26 @@ import {
 	getTextFromAssistantResponse,
 	SYSTEM_PROMPT,
 	stripLeakedInternals,
-} from './summary-stream';
+} from '@live-compaction/summary-stream';
 import {
 	buildBranchSummaryRenderVars,
 	buildRenderVars,
 	type CompactionTemplate,
 	loadCompactionTemplate,
 	loadCompactionTemplateFromString,
-} from './template';
+} from '@live-compaction/template';
 
 // Re-exports for external consumers
 export type {
 	ConfigScope,
+	IncludeFilesTouchedSettings,
 	LiveCompactionConfig,
 	LiveCompactionPaths,
-	IncludeFilesTouchedSettings,
 	PresetConfig,
 	PromptKind,
 	PromptResolution,
 	ThinkingLevel,
-} from './config';
+} from '@live-compaction/config';
 export {
 	CURRENT_PRESET_SENTINEL,
 	DEFAULT_COMPACTION_PROMPT_CONTRACT,
@@ -86,7 +85,7 @@ export {
 	normalizeOptionalText,
 	normalizeThinkingLevel,
 	parseConfig,
-} from './config';
+} from '@live-compaction/config';
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -348,7 +347,7 @@ async function resolveConfiguredFallbackSummarizer(
 export {
 	formatManifestOperations,
 	renderFilesTouchedManifestBlock,
-} from './files-touched-manifest';
+} from '@live-compaction/files-touched-manifest';
 
 // ---------------------------------------------------------------------------
 // Notify helper
@@ -558,12 +557,14 @@ async function executeSummaryCall(
 		throw new CompactionAbortedError();
 	}
 
-	const discardedText = params.discardedMessages.length
-		? serializeConversation(convertToLlm(params.discardedMessages))
-		: '';
-	const keptTailText = params.keptTailMessages.length
-		? serializeConversation(convertToLlm(params.keptTailMessages))
-		: '';
+	const discardedText =
+		params.discardedMessages.length > 0
+			? serializeConversation(convertToLlm(params.discardedMessages))
+			: '';
+	const keptTailText =
+		params.keptTailMessages.length > 0
+			? serializeConversation(convertToLlm(params.keptTailMessages))
+			: '';
 
 	let promptText: string | undefined;
 
@@ -842,9 +843,10 @@ export async function runGroundedBranchSummaryAugmentation(
 				branchEntryMessages.push(entry.message as unknown as Message);
 			}
 		}
-		const branchMessagesText = branchEntryMessages.length
-			? serializeConversation(convertToLlm(branchEntryMessages))
-			: undefined;
+		const branchMessagesText =
+			branchEntryMessages.length > 0
+				? serializeConversation(convertToLlm(branchEntryMessages))
+				: undefined;
 
 		const customFocus = event.preparation.customInstructions || undefined;
 

@@ -19,25 +19,24 @@
  */
 
 import type { Message } from '@earendil-works/pi-ai';
-import {
-	loadTemplate,
-	loadTemplateFromString,
-	TemplateKitError,
-	type LoadedTemplate,
-} from 'pi-template-kit/template';
-
-import { normalizeThinkingLevel } from './config';
+import { normalizeThinkingLevel } from '@live-compaction/config';
 import type {
 	BranchSummaryRenderVars,
 	CompactionRenderVars,
 	CompactionTemplateFrontmatter,
-} from './template-types';
+} from '@live-compaction/template-types';
+import {
+	type LoadedTemplate,
+	loadTemplate,
+	loadTemplateFromString,
+	TemplateKitError,
+} from 'pi-template-kit/template';
 
 export type {
 	BranchSummaryRenderVars,
 	CompactionRenderVars,
 	CompactionTemplateFrontmatter,
-} from './template-types';
+} from '@live-compaction/template-types';
 
 // ---------------------------------------------------------------------------
 // Frontmatter

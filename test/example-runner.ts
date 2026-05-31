@@ -26,9 +26,8 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
-
-import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
 import type { Message } from '@earendil-works/pi-ai';
+import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
 
 import type { FilesTouchedEntry } from '@live-compaction/files-touched';
 import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
@@ -140,18 +139,16 @@ export async function renderExample(example: ExampleDir): Promise<string> {
 	const discardedMessages = exampleCase.discarded.map(toMessage);
 	const keptTailMessages = exampleCase.kept_tail.map(toMessage);
 
-	const discardedText = discardedMessages.length
-		? serializeConversation(convertToLlm(discardedMessages))
-		: '';
-	const keptTailText = keptTailMessages.length
-		? serializeConversation(convertToLlm(keptTailMessages))
-		: '';
+	const discardedText =
+		discardedMessages.length > 0 ? serializeConversation(convertToLlm(discardedMessages)) : '';
+	const keptTailText =
+		keptTailMessages.length > 0 ? serializeConversation(convertToLlm(keptTailMessages)) : '';
 
 	const includeFilesTouched =
 		exampleCase.include_files_touched ??
 		Boolean(exampleCase.files_touched && exampleCase.files_touched.length > 0);
 	let filesTouchedBlock: string | undefined;
-	if (includeFilesTouched && exampleCase.files_touched?.length) {
+	if (includeFilesTouched && exampleCase.files_touched && exampleCase.files_touched.length > 0) {
 		const entries = exampleCase.files_touched.map(toFilesTouchedEntry);
 		const rendered = renderFilesTouchedManifestBlock(entries);
 		filesTouchedBlock = rendered || undefined;

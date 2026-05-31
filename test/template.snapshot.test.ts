@@ -12,24 +12,20 @@
  *   - latest-user-ask helper
  */
 
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
-import { describe, expect, it } from 'vitest';
-
-import {
-	collectFilesTouched,
-	type FilesTouchedEntry,
-} from '@live-compaction/files-touched';
+import { collectFilesTouched, type FilesTouchedEntry } from '@live-compaction/files-touched';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import {
 	collectDiscardedFromFixture,
 	collectKeptTailFromFixture,
 	loadSessionFixtureFromJsonl,
 } from '@live-compaction/session-fixtures';
-import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
+import { describe, expect, it } from 'vitest';
 
 const FIXTURE = path.join(__dirname, 'fixtures', 'with-files-touched.jsonl');
 
@@ -104,10 +100,10 @@ describe('compaction prompt snapshot from JSONL fixture', () => {
 			filesTouchedBlock: filesTouchedBlock || undefined,
 			discardedMessages: convertToLlm(discardedMessages),
 			keptTailMessages: convertToLlm(keptTailMessages),
-			frontmatter: tpl!.frontmatter,
+			frontmatter: tpl?.frontmatter,
 		});
 
-		const out = tpl!.render(vars);
+		const out = tpl?.render(vars);
 		expect(out).not.toContain('undefined');
 		// Latest user ask comes from the last user message in the fixture.
 		expect(out).toContain('CHANGELOG.md');

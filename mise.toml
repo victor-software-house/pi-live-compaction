@@ -1,0 +1,36 @@
+min_version = "2025.1.0"
+
+[tools]
+node = "22"
+lefthook = "latest"
+
+[settings]
+lockfile = true
+
+[tasks.typecheck]
+description = "TypeScript type check"
+run = "pnpm run typecheck"
+
+[tasks.lint]
+description = "Biome + oxlint"
+run = "pnpm run lint"
+
+[tasks.format]
+description = "Format with biome"
+run = "pnpm run format"
+
+[tasks.test]
+description = "Run vitest suite"
+run = "pnpm run test"
+
+[tasks.verify]
+description = "Full verification gate"
+depends = ["typecheck", "lint", "test"]
+
+[tasks.commitlint]
+description = "Validate commit message"
+run = 'npx --no -- commitlint --edit "$@"'
+
+[tasks."hooks:install"]
+description = "Install lefthook hooks"
+run = "lefthook install"

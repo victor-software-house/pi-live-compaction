@@ -1,6 +1,5 @@
-import { describe, expect, it } from 'vitest';
-
 import { SYSTEM_PROMPT } from '@live-compaction/summary-stream';
+import { describe, expect, it } from 'vitest';
 
 describe('SYSTEM_PROMPT', () => {
 	it('keeps non-overridable carry-forward invariants in system scope', () => {
