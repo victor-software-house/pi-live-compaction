@@ -1,0 +1,9 @@
+{"id":"019e0000-0000-0000-0000-000000000001","type":"session"}
+{"id":"u1","type":"message","message":{"role":"user","content":[{"type":"text","text":"Read README.md and summarise it."}],"timestamp":1735000000000}}
+{"id":"a1","type":"message","message":{"role":"assistant","content":[{"type":"text","text":"Reading README.md."},{"type":"toolCall","id":"t1","name":"read","arguments":{"path":"README.md"}}],"timestamp":1735000001000}}
+{"id":"r1","type":"message","message":{"role":"toolResult","content":[{"type":"toolResult","toolCallId":"t1","output":"# README\nHello world."}],"timestamp":1735000002000}}
+{"id":"a2","type":"message","message":{"role":"assistant","content":[{"type":"text","text":"README is just a hello world stub."}],"timestamp":1735000003000}}
+{"id":"u2","type":"message","message":{"role":"user","content":[{"type":"text","text":"Now edit README.md to add a Setup section."}],"timestamp":1735000004000}}
+{"id":"a3","type":"message","message":{"role":"assistant","content":[{"type":"text","text":"Editing README.md."},{"type":"toolCall","id":"t2","name":"edit","arguments":{"path":"README.md","edits":[{"oldText":"Hello world.","newText":"Hello world.\n\n## Setup\nClone and install."}]}}],"timestamp":1735000005000}}
+{"id":"r2","type":"message","message":{"role":"toolResult","content":[{"type":"toolResult","toolCallId":"t2","output":"Edited README.md"}],"timestamp":1735000006000}}
+{"id":"u3","type":"message","message":{"role":"user","content":[{"type":"text","text":"Great. Next: add a CHANGELOG.md and link it from README."}],"timestamp":1735000007000}}

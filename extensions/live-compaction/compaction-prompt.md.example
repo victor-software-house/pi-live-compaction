@@ -1,0 +1,15 @@
+---
+description: >
+  Default live-compaction template. Body composes the prompt from
+  reusable partials in templates/. Frontmatter only carries runtime knobs.
+preset: deep
+thinking_level: high
+---
+{% include '_blocks' %}
+{%- if last_user_message | present %}
+<latest-user-ask>
+{{ last_user_message | truncate: 800 }}
+</latest-user-ask>
+
+{% endif %}
+{% include '_contract' %}

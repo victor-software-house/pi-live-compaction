@@ -1,0 +1,18 @@
+{
+  "description": "Multi-file files-touched manifest covering every operation badge combo. Regression coverage for the `undefined`-rows bug.",
+  "files_touched": [
+    { "ops": "R",    "displayPath": "README.md" },
+    { "ops": "RE",   "displayPath": "src/auth/middleware.ts" },
+    { "ops": "W",    "displayPath": "src/auth/middleware.test.ts" },
+    { "ops": "M",    "displayPath": "docs/old.md" },
+    { "ops": "D",    "displayPath": "scripts/deprecated.sh" },
+    { "ops": "RWEMD","displayPath": "everything.txt" }
+  ],
+  "discarded": [
+    { "role": "user", "text": "Reorganise the auth module." },
+    { "role": "assistant", "text": "Moving + editing + adding a test." }
+  ],
+  "kept_tail": [
+    { "role": "user", "text": "Run the suite and report results." }
+  ]
+}

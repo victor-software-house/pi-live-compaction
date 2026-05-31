@@ -1,0 +1,13 @@
+onlyBuiltDependencies:
+  - '@google/genai'
+  - esbuild
+  - protobufjs
+
+# Pi SDK packages are trusted; skip release-age gate
+minimumReleaseAgeExclude:
+  - '@earendil-works/*'
+
+allowBuilds:
+  '@google/genai': true
+  esbuild: true
+  protobufjs: true

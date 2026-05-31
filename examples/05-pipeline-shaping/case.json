@@ -1,0 +1,16 @@
+{
+  "description": "Pipeline shaping with Liquid built-ins: where, slice, size, group_by, truncate. The whole template body is one declarative chain — no imperative each/if needed.",
+  "discarded": [
+    { "role": "user", "text": "First ask." },
+    { "role": "assistant", "text": "Reply 1." },
+    { "role": "user", "text": "Second ask." },
+    { "role": "assistant", "text": "Reply 2." },
+    { "role": "user", "text": "Third ask." },
+    { "role": "assistant", "text": "Reply 3." },
+    { "role": "user", "text": "Fourth ask." },
+    { "role": "assistant", "text": "Reply 4." }
+  ],
+  "kept_tail": [
+    { "role": "user", "text": "Final pivot: do Z." }
+  ]
+}

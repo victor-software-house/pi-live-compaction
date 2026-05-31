@@ -1,0 +1,17 @@
+{
+  "description": "Every block populated using the {% xml %} block tag, which auto-omits empty bodies.",
+  "previous_summary": "Earlier session shipped a refactor of the auth middleware (commit a1b2c3d). Tests green at HEAD.",
+  "focus": "/compact --preset deep keep an explicit list of remaining tickets",
+  "files_touched": [
+    { "ops": "RE", "displayPath": "src/auth/middleware.ts" },
+    { "ops": "W", "displayPath": "src/auth/middleware.test.ts" }
+  ],
+  "discarded": [
+    { "role": "user", "text": "Pick up where we left off on auth middleware." },
+    { "role": "assistant", "text": "Reviewing the diff and tests now." }
+  ],
+  "kept_tail": [
+    { "role": "user", "text": "Confirm the rate limiter still works after the refactor." },
+    { "role": "assistant", "text": "Will run the integration suite next." }
+  ]
+}

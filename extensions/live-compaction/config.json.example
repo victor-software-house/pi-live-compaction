@@ -1,0 +1,28 @@
+{
+    "includeFilesTouched": {
+        "inCompactionSummary": true,
+        "inBranchSummary": true
+    },
+    "defaultPreset": "deep",
+    "fallbackPreset": "sonnet",
+    "defaultPanelScope": "global",
+    "inheritSessionModel": false,
+    "presets": {
+        "fast": {
+            "model": "openai-codex/gpt-5.4-mini",
+            "thinkingLevel": "medium"
+        },
+        "cheap": {
+            "model": "openai-codex/gpt-5.4-mini",
+            "thinkingLevel": "low"
+        },
+        "sonnet": {
+            "model": "anthropic/claude-sonnet-4-6",
+            "thinkingLevel": "high"
+        },
+        "deep": {
+            "model": "anthropic/claude-opus-4-6",
+            "thinkingLevel": "high"
+        }
+    }
+}

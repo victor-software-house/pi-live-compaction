@@ -1,0 +1,10 @@
+{
+  "description": "Smallest possible: blocks + latest-user-ask anchor.",
+  "discarded": [
+    { "role": "user", "text": "How do I list files?" },
+    { "role": "assistant", "text": "Use `ls` or the `find` tool." }
+  ],
+  "kept_tail": [
+    { "role": "user", "text": "Now show me the largest files." }
+  ]
+}

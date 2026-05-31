@@ -1,0 +1,34 @@
+# What to include
+
+Use these section headings exactly. Omit a section only if it is truly empty. Prefer bullets under each heading.
+
+## Purpose
+Objective or question being pursued on this branch. Include the specific user ask or quoted wording when it materially shaped the branch.
+
+## User intent & branch delta
+What the user was trying to learn, change, or prove in this branch; what changed relative to the shared ancestor; and which asks remain relevant outside this branch.
+
+## Outcome
+Concrete results, findings, and insights worth carrying forward.
+
+## Constraints & preferences
+Requirements, preferences, or constraints that shaped the work on this branch.
+
+## Key decisions
+Decisions made with brief rationale, including approaches tried, disproven, or ruled out.
+
+## Status
+What is done, what is in progress, what remains unverified, what is unresolved or blocked, and what should not be retried without new evidence. Distinguish observed facts from inferences.
+
+## Next steps
+Concrete actions for continuing this work, in order. Note dependencies between steps.
+
+## Mandatory reading
+Exact file paths relevant to this branch's work.
+
+# Style
+- Keep the summary concise and continuation-friendly
+- Preserve exact file paths, symbol names, commands, error text, and user wording where useful
+- Make it obvious what is reusable versus branch-local
+- If a files-touched or user-message block is present, use it as authoritative context but do not repeat it exhaustively
+- Output only markdown for the summary

@@ -1,0 +1,8 @@
+{
+  "description": "Edge case: kept tail is empty (operator cut at end of session). Templates render `(none)` and {% if last_user_message %} still resolves against the discarded span fallback.",
+  "discarded": [
+    { "role": "user", "text": "Ship the feature." },
+    { "role": "assistant", "text": "Shipped." }
+  ],
+  "kept_tail": []
+}

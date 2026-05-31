@@ -1,0 +1,15 @@
+{
+  "description": "Real layout inheritance — `_base` lays out the scaffolding once, the main template only overrides the {% block content %} slot.",
+  "previous_summary": "Earlier session shipped foo.",
+  "focus": "/compact --preset deep",
+  "files_touched": [
+    { "ops": "RE", "displayPath": "src/foo.ts" }
+  ],
+  "discarded": [
+    { "role": "user", "text": "Continue work on foo." },
+    { "role": "assistant", "text": "Working." }
+  ],
+  "kept_tail": [
+    { "role": "user", "text": "Add a benchmark." }
+  ]
+}

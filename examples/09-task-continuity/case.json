@@ -1,0 +1,20 @@
+{
+  "description": "Task continuity guidance for multi-step work",
+  "focus": "continue current compaction reliability work; keep sidetracks as lower-priority TODOs",
+  "discarded": [
+    {
+      "role": "user",
+      "text": "Investigate WebSocket reliability and make compaction recoverable."
+    },
+    {
+      "role": "assistant",
+      "text": "Created tasks for SSE transport, prompt updates, persistent suggestions, and modularization."
+    }
+  ],
+  "kept_tail": [
+    {
+      "role": "user",
+      "text": "Update the compaction template to make sure we add detailed tasks with pi-tasks if not already existing."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`compaction prompt snapshot from JSONL fixture > renders a stable prompt from with-files-touched.jsonl 1`] = `
+"
+<discarded-conversation>
+[User]: Read README.md and summarise it.
+
+[Assistant]: Reading README.md.
+
+[Assistant tool calls]: read(path="README.md")
+
+[Assistant]: README is just a hello world stub.
+
+[User]: Now edit README.md to add a Setup section.
+
+[Assistant]: Editing README.md.
+
+[Assistant tool calls]: edit(path="README.md", edits=[{"oldText":"Hello world.","newText":"Hello world.\\n\\n## Setup\\nClone and install."}])
+</discarded-conversation>
+
+<kept-tail>
+[User]: Great. Next: add a CHANGELOG.md and link it from README.
+</kept-tail><latest-user-ask>
+Great. Next: add a CHANGELOG.md and link it from README.
+</latest-user-ask>
+"
+`;
