@@ -22,6 +22,7 @@ bin/                     preview and example-update scripts
 | File | Responsibility |
 |---|---|
 | `index.ts` | Extension entry — hooks `session:beforeCompact` + `session:beforeTree`, preset resolution, summary orchestration |
+| `compaction-chat-message.ts` | Live-streaming custom message in chat flow (renderer, context filter, cleanup) |
 | `summary-stream.ts` | Streaming LLM call with partial recovery on stream failure |
 | `template.ts` | Liquid template loading via `pi-template-kit` with frontmatter parsing |
 | `config.ts` | Scope-aware config (global/project), preset management, prompt resolution cascade |
@@ -31,6 +32,23 @@ bin/                     preview and example-update scripts
 | `files-touched.ts` | File-touch manifest extraction from session history |
 | `files-touched-manifest.ts` | Manifest rendering for compaction/branch summaries |
 | `session-fixtures.ts` | Session message construction helpers |
+
+## Module structure (planned extraction from `index.ts`)
+
+`index.ts` is 1174 lines bundling too many concerns. Extraction targets:
+
+| Section | Target | Status |
+|---|---|---|
+| Instruction parsing + preset matching | `preset.ts` | planned |
+| Model / summarizer resolution | `summarizer.ts` | planned |
+| `makeSummaryProgress` | `compaction-chat-message.ts` | done |
+| Summarization core + compaction handler | `compaction-handler.ts` | planned |
+| Branch summary handler | `branch-handler.ts` | planned |
+| Extension factory | stays in `index.ts` (thin wiring) | — |
+
+Rules: each module exports pure/factory functions, no circular imports back
+to `index.ts`, `RunDeps` injection stays for testability, extract one at a
+time with typecheck + test after each.
 
 ## Dependencies
 
