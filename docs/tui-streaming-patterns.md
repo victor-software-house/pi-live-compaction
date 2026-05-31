@@ -118,49 +118,58 @@ pi.events.on('live-compaction:chunk', ({ text }) => update(text));
 pi.events.on('live-compaction:done', ({ text }) => finish(text));
 ```
 
-### 7. Cleanup on finish
+### 7. Entry ID capture
 
-Track the entry ID at send time, mutate by ID at cleanup time:
+`sendMessage` does not return the entry ID. Capture it asynchronously via the
+`message_end` event, which fires after the entry is persisted:
 
 ```typescript
-// At send time — sendMessage is synchronous when not streaming,
-// so the entry exists immediately after the call
-pi.sendMessage({ customType, content: '...', display: true });
-const entries = ctx.sessionManager.getEntries();
-const entry = [...entries].reverse()
-  .find(e => e.type === 'custom_message' && e.customType === customType);
-const entryId = entry?.id;  // save for later
+let entryId: string | null = null;
 
-// At finish time — getEntry returns the same mutable object (verified)
-function finish(text: string) {
-  phase = 'done';
-  boxRef?.setBgFn((t) => theme.bg('customMessageBg', t));
-  update(text);
+pi.on('message_end', (event, ctx) => {
+  if (event.message.role === 'custom' && event.message.customType === customType && !entryId) {
+    const entries = ctx.sessionManager.getEntries();
+    const entry = [...entries].reverse()
+      .find(e => e.type === 'custom_message' && e.customType === customType);
+    entryId = entry?.id ?? null;
+  }
+});
+```
 
-  // Hide from rebuild — compaction_end triggers rebuildChatFromMessages
+The one-time reverse scan only happens inside the event handler (not on every
+call). After capture, all access uses `getEntry(entryId)`.
+
+### 8. Cleanup via `session_compact`
+
+`session_compact` fires AFTER compaction is committed but BEFORE
+`compaction_end` triggers `rebuildChatFromMessages()`. This is the tightest
+possible point to hide our message:
+
+```typescript
+pi.on('session_compact', (event, ctx) => {
   if (entryId) {
     const entry = ctx.sessionManager.getEntry(entryId);
     if (entry) entry.display = undefined;
   }
-}
+});
 ```
 
-Setting `display = undefined` hides the message when `rebuildChatFromMessages()`
-runs. This happens automatically on `compaction_end`. Pi's built-in
-`CompactionSummaryMessageComponent` then takes over.
+On the next line, `compaction_end` fires → `rebuildChatFromMessages()` → our
+message is skipped (display is falsy) → Pi's built-in
+`CompactionSummaryMessageComponent` takes over.
 
-**Why this is safe:**
+The `finish()` function only handles visual state (bg color transition +
+final content). It does NOT touch entry display — that belongs to the
+compaction lifecycle hook.
+
+**Why entry mutation is safe:**
 - `getEntry(id)` returns the same live object reference as `getEntries()` —
   confirmed via identity check (`===`). No cloning, no freezing.
 - Lookup by ID is branch-safe: the entry ID is stable across the session tree.
 - We only mutate `display`, a rendering hint. We never insert or remove entries
   from the session tree — that would break the parent/child chain.
-
-**Precedent:** Pi's official examples (`snake.ts`, `tools.ts`, `preset.ts`)
-use `getEntries()` to read and act on live entry objects. The returned entries
-are mutable plain objects. Our `display` mutation follows the same entry access
-pattern that Pi documents for session state persistence via `appendEntry` /
-`getEntries()` (see `extensions.md` § pi.appendEntry).
+- Pi's official examples (`snake.ts`, `tools.ts`, `preset.ts`) use `getEntries()`
+  to read and act on live entry objects (see `extensions.md` § pi.appendEntry).
 
 ## Theme Colors
 
