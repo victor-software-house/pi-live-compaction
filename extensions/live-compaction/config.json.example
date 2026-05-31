@@ -1,28 +1,32 @@
 {
-    "includeFilesTouched": {
-        "inCompactionSummary": true,
-        "inBranchSummary": true
-    },
-    "defaultPreset": "deep",
-    "fallbackPreset": "sonnet",
-    "defaultPanelScope": "global",
-    "inheritSessionModel": false,
-    "presets": {
-        "fast": {
-            "model": "openai-codex/gpt-5.4-mini",
-            "thinkingLevel": "medium"
-        },
-        "cheap": {
-            "model": "openai-codex/gpt-5.4-mini",
-            "thinkingLevel": "low"
-        },
-        "sonnet": {
-            "model": "anthropic/claude-sonnet-4-6",
-            "thinkingLevel": "high"
-        },
-        "deep": {
-            "model": "anthropic/claude-opus-4-6",
-            "thinkingLevel": "high"
-        }
-    }
+	"includeFilesTouched": {
+		"inCompactionSummary": true,
+		"inBranchSummary": true
+	},
+	"defaultPreset": "default",
+	"fallbackPreset": "cheap",
+	"defaultPanelScope": "global",
+	"inheritSessionModel": false,
+	"presets": {
+		"fast": {
+			"model": "openai-codex/gpt-5.4-mini",
+			"thinkingLevel": "medium"
+		},
+		"cheap": {
+			"model": "anthropic/claude-haiku-4-5",
+			"thinkingLevel": "low"
+		},
+		"default": {
+			"model": "anthropic/claude-sonnet-4-6",
+			"thinkingLevel": "medium"
+		},
+		"deep": {
+			"model": "anthropic/claude-sonnet-4-6",
+			"thinkingLevel": "high"
+		},
+		"thorough": {
+			"model": "anthropic/claude-opus-4-8",
+			"thinkingLevel": "xhigh"
+		}
+	}
 }

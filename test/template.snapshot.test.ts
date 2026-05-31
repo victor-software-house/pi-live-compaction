@@ -22,13 +22,13 @@ import { describe, expect, it } from 'vitest';
 import {
 	collectFilesTouched,
 	type FilesTouchedEntry,
-} from '@shared/files-touched-core';
+} from '@live-compaction/files-touched';
 import {
 	collectDiscardedFromFixture,
 	collectKeptTailFromFixture,
 	loadSessionFixtureFromJsonl,
-} from '@shared/session-fixtures';
-import { renderFilesTouchedManifestBlock } from '@shared/files-touched-manifest';
+} from '@live-compaction/session-fixtures';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
 
 const FIXTURE = path.join(__dirname, 'fixtures', 'with-files-touched.jsonl');

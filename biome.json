@@ -25,7 +25,7 @@
 						"patterns": [
 							{
 								"group": ["../*", "../**/*"],
-								"message": "Use @live-compaction/* or @shared/* path aliases instead of relative parent imports."
+								"message": "Use @live-compaction/* path alias instead of relative parent imports."
 							}
 						]
 					}

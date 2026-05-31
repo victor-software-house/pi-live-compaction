@@ -14,8 +14,8 @@ import {
 	type SessionEntry,
 	serializeConversation,
 } from '@earendil-works/pi-coding-agent';
-import { collectFilesTouched, type FilesTouchedEntry } from '@shared/files-touched-core';
-import { renderFilesTouchedManifestBlock } from '@shared/files-touched-manifest';
+import { collectFilesTouched, type FilesTouchedEntry } from './files-touched';
+import { renderFilesTouchedManifestBlock } from './files-touched-manifest';
 import { appendCompactionAttemptEntry } from './attempt-entry';
 import { CompactionAbortedError, isAbortError } from './errors';
 import { registerLiveCompactionCommand } from './command';
@@ -93,7 +93,7 @@ export {
 // ---------------------------------------------------------------------------
 
 // FILES_TOUCHED_HEADING / FILES_TOUCHED_LEGEND / formatManifestOperations /
-// renderFilesTouchedManifestBlock all live in _shared/files-touched-manifest.ts
+// renderFilesTouchedManifestBlock lives in ./files-touched-manifest.ts
 // so that tests + the preview CLI can import them without dragging in
 // @earendil-works/pi-tui (which is only available inside Pi runtime).
 
@@ -348,7 +348,7 @@ async function resolveConfiguredFallbackSummarizer(
 export {
 	formatManifestOperations,
 	renderFilesTouchedManifestBlock,
-} from '@shared/files-touched-manifest';
+} from './files-touched-manifest';
 
 // ---------------------------------------------------------------------------
 // Notify helper

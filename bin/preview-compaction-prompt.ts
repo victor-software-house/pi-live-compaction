@@ -25,13 +25,13 @@ import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-a
 import {
 	collectFilesTouched,
 	type FilesTouchedEntry,
-} from '@shared/files-touched-core';
+} from '@live-compaction/files-touched';
 import {
 	collectDiscardedFromFixture,
 	collectKeptTailFromFixture,
 	loadSessionFixtureFromJsonl,
-} from '@shared/session-fixtures';
-import { renderFilesTouchedManifestBlock } from '@shared/files-touched-manifest';
+} from '@live-compaction/session-fixtures';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
 
 interface Args {

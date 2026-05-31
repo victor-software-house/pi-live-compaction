@@ -72,33 +72,46 @@ The template engine provides these variables:
 
 ## Configuration
 
+All configuration lives in `config.json` files. Prompts are Liquid templates (`.md`). Both support a two-level scope cascade:
+
+| Scope | Path |
+|---|---|
+| Project | `.pi/extensions/live-compaction/` |
+| Global | `~/.pi/agent/extensions/live-compaction/` |
+
+Resolution order: **project → global → built-in defaults**. Project overrides win. The TUI panel (`/live-compaction`) lets you switch between scopes when editing.
+
+Each scope directory can contain:
+
+```
+config.json                  # preset routing, feature toggles
+compaction-prompt.md         # main compaction template (Liquid)
+branch-summary-prompt.md     # branch summary template (Liquid)
+```
+
 ### Presets
 
 Route compaction to different models with different thinking levels:
 
 ```json
 {
-  "defaultPreset": "deep",
+  "defaultPreset": "default",
+  "fallbackPreset": "cheap",
   "presets": {
-    "cheap": { "model": "anthropic/claude-haiku-4-5" },
-    "default": { "model": "anthropic/claude-sonnet-4-20250514" },
-    "deep": { "model": "anthropic/claude-sonnet-4-20250514", "thinkingLevel": "high" }
+    "fast": { "model": "openai-codex/gpt-5.4-mini", "thinkingLevel": "medium" },
+    "cheap": { "model": "anthropic/claude-haiku-4-5", "thinkingLevel": "low" },
+    "default": { "model": "anthropic/claude-sonnet-4-6", "thinkingLevel": "medium" },
+    "deep": { "model": "anthropic/claude-sonnet-4-6", "thinkingLevel": "high" },
+    "thorough": { "model": "anthropic/claude-opus-4-8", "thinkingLevel": "xhigh" }
   }
 }
 ```
 
-Use `/compact --preset cheap` for lightweight compaction or let the default kick in automatically.
+Use `/compact --preset cheap` for lightweight compaction or let the default kick in automatically. If the default preset's model auth fails, `fallbackPreset` is tried before falling back to the session model.
 
 ### Custom templates
 
-Override the compaction prompt at global or project scope:
-
-```
-~/.pi/agent/extensions/live-compaction/compaction-prompt.md          # global
-.pi/extensions/live-compaction/compaction-prompt.md                    # project
-```
-
-Templates are Liquid with frontmatter knobs:
+Drop a `compaction-prompt.md` or `branch-summary-prompt.md` in the project or global scope directory (see above). Templates are [LiquidJS](https://liquidjs.com/) with frontmatter knobs:
 
 ```markdown
 ---
@@ -141,7 +154,7 @@ The `examples/` directory contains 9 declarative golden-file examples covering t
 | 08 | no-kept-tail | Empty kept-tail edge case |
 | 09 | task-continuity | Task-state snapshot and continuity guidance |
 
-Run `pnpm test` to verify all examples render to their golden expected output.
+Run `pnpm test` to verify all examples render to their golden expected output. See [`examples/AGENTS.md`](examples/AGENTS.md) for full details.
 
 ## Related packages
 
@@ -157,6 +170,14 @@ pnpm test              # vitest (50 tests)
 pnpm run preview       # render a compaction prompt to stdout
 pnpm run examples:update  # regenerate golden expected files
 ```
+
+## Roadmap
+
+- **Per-preset fallback chains** — each preset declares its own fallback model, enabling retry chains (e.g. Sonnet → GPT-5.5 → Haiku) before falling back to the session model
+- **Per-preset prompt routing** — map preset tiers to prompt template variants so stronger models get richer contracts and cheaper models get tighter directives
+- **Context-aware model selection** — auto-select presets based on session length, available models, cost budget, and provider health
+- **Modularization** — split monolithic entry/config/panel files into focused domain modules
+- **Reusable TUI components** — adopt shared `SettingsPanel` / editor components for the settings panel
 
 ## Inspiration and attribution
 

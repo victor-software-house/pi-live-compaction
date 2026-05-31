@@ -30,8 +30,8 @@ import process from 'node:process';
 import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
 import type { Message } from '@earendil-works/pi-ai';
 
-import type { FilesTouchedEntry } from '@shared/files-touched-core';
-import { renderFilesTouchedManifestBlock } from '@shared/files-touched-manifest';
+import type { FilesTouchedEntry } from '@live-compaction/files-touched';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
 
 // ---------------------------------------------------------------------------

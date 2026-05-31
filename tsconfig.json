@@ -13,7 +13,6 @@
 		"verbatimModuleSyntax": true,
 		"paths": {
 			"@live-compaction/*": ["./extensions/live-compaction/*"],
-			"@shared/*": ["./extensions/_shared/*"],
 			"@test/*": ["./test/*"]
 		}
 	},

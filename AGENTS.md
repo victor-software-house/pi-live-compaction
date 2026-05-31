@@ -10,12 +10,10 @@ extensions/
     templates/           Liquid partials (_blocks.md, _contract.md)
     *.ts                 core modules
     *.md.example         default prompt/config examples
-  _shared/               shared utils (files-touched)
 test/                    vitest suite (50 tests)
   fixtures/              test fixtures
   snapshots/             golden snapshots (tracked)
 examples/                9 declarative golden-file template examples
-docs/prd/                design docs (Draft)
 bin/                     preview and example-update scripts
 ```
 
@@ -30,7 +28,9 @@ bin/                     preview and example-update scripts
 | `controller.ts` | State management, validation, settings panel data |
 | `command.ts` | `/live-compaction` TUI settings panel |
 | `attempt-entry.ts` | Diagnostic entry logger |
-| `_shared/files-touched-core.ts` | File-touch manifest extraction from session history |
+| `files-touched.ts` | File-touch manifest extraction from session history |
+| `files-touched-manifest.ts` | Manifest rendering for compaction/branch summaries |
+| `session-fixtures.ts` | Session message construction helpers |
 
 ## Dependencies
 
@@ -46,13 +46,14 @@ pnpm run typecheck
 pnpm test
 ```
 
-All imports use `.ts` extensions (Pi loads TS directly via jiti). No build step.
+Extensionless imports with `@live-compaction/*` and `@test/*` tsconfig path aliases. No build step — Pi loads TS directly via jiti.
 
 ## Config paths
 
 - Global: `~/.pi/agent/extensions/live-compaction/`
 - Project: `.pi/extensions/live-compaction/`
-- Project overrides global for config, compaction prompt, and branch-summary prompt
+- Resolution: project → global → hardcoded defaults
+- TUI panel (`/live-compaction`) supports scope switching
 
 ## Conventions
 
@@ -61,3 +62,5 @@ All imports use `.ts` extensions (Pi loads TS directly via jiti). No build step.
 - Public npm (`access: "public"`)
 - Pi 0.78.0+ peer deps
 - Strip-only TS compatible (no parameter properties, enums, or namespaces)
+- No `../` imports — enforced by biome `noRestrictedImports` + oxlint `import-alias`
+- Tabs, single quotes, 100-col (biome)

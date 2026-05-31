@@ -1,88 +1,86 @@
 {
-	"name": "pi-live-compaction",
-	"version": "0.1.0",
-	"description": "Live streaming compaction for Pi — structured summaries with preset routing, Liquid templates, files-touched manifests, and a full TUI settings panel.",
-	"author": "Victor Software House",
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "git+ssh://git@github.com/victor-software-house/pi-live-compaction.git"
-	},
-	"homepage": "https://github.com/victor-software-house/pi-live-compaction#readme",
-	"bugs": {
-		"url": "https://github.com/victor-software-house/pi-live-compaction/issues"
-	},
-	"keywords": [
-		"pi-package",
-		"compaction",
-		"context-management",
-		"live-streaming",
-		"llm"
-	],
-	"type": "module",
-	"packageManager": "pnpm@11.5.0",
-	"files": [
-		"extensions",
-		"examples",
-		"docs",
-		"bin",
-		"README.md",
-		"CHANGELOG.md",
-		"LICENSE"
-	],
-	"pi": {
-		"extensions": [
-			"./extensions/live-compaction/index.ts"
-		]
-	},
-	"scripts": {
-		"check": "tsc --noEmit -p tsconfig.json",
-		"typecheck": "tsc --noEmit -p tsconfig.json",
-		"test": "vitest run",
-		"test:watch": "vitest",
-		"lint": "biome check . && oxlint",
-		"lint:fix": "biome check --write . && oxlint --fix",
-		"format": "biome format --write .",
-		"preview": "tsx bin/preview-compaction-prompt.ts",
-		"examples:update": "tsx bin/update-examples.ts",
-		"changeset": "changeset",
-		"version": "changeset version",
-		"release": "changeset publish"
-	},
-	"peerDependencies": {
-		"@earendil-works/pi-ai": "*",
-		"@earendil-works/pi-coding-agent": "*",
-		"@earendil-works/pi-tui": "*"
-	},
-	"peerDependenciesMeta": {
-		"@earendil-works/pi-ai": {
-			"optional": false
-		},
-		"@earendil-works/pi-coding-agent": {
-			"optional": false
-		},
-		"@earendil-works/pi-tui": {
-			"optional": false
-		}
-	},
-	"dependencies": {
-		"dedent": "^1.7.2",
-		"pi-template-kit": "^0.1.1"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "^2.4.16",
-		"@changesets/changelog-github": "^0.7.0",
-		"@changesets/cli": "^2.31.0",
-		"@commitlint/cli": "^21.0.2",
-		"@commitlint/config-conventional": "^21.0.2",
-		"@earendil-works/pi-ai": "^0.78.0",
-		"@earendil-works/pi-coding-agent": "^0.78.0",
-		"@earendil-works/pi-tui": "^0.78.0",
-		"@types/node": "^25.9.1",
-		"oxlint": "^1.67.0",
-		"tsx": "^4.22.3",
-		"typescript": "^6.0.3",
-		"vite-tsconfig-paths": "^6.1.1",
-		"vitest": "^4.1.7"
-	}
+  "name": "pi-live-compaction",
+  "version": "0.1.0",
+  "description": "Live streaming compaction for Pi — structured summaries with preset routing, Liquid templates, files-touched manifests, and a full TUI settings panel.",
+  "author": "Victor Software House",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/victor-software-house/pi-live-compaction.git"
+  },
+  "homepage": "https://github.com/victor-software-house/pi-live-compaction#readme",
+  "bugs": {
+    "url": "https://github.com/victor-software-house/pi-live-compaction/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "compaction",
+    "context-management",
+    "live-streaming",
+    "llm"
+  ],
+  "type": "module",
+  "packageManager": "pnpm@11.5.0",
+  "files": [
+    "extensions",
+    "examples",
+    "bin",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions/live-compaction/index.ts"
+    ]
+  },
+  "scripts": {
+    "check": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check . && oxlint",
+    "lint:fix": "biome check --write . && oxlint --fix",
+    "format": "biome format --write .",
+    "preview": "tsx bin/preview-compaction-prompt.ts",
+    "examples:update": "tsx bin/update-examples.ts",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "changeset publish"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-ai": {
+      "optional": false
+    },
+    "@earendil-works/pi-coding-agent": {
+      "optional": false
+    },
+    "@earendil-works/pi-tui": {
+      "optional": false
+    }
+  },
+  "dependencies": {
+    "dedent": "^1.7.2",
+    "pi-template-kit": "^0.1.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.16",
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "@earendil-works/pi-ai": "^0.78.0",
+    "@earendil-works/pi-coding-agent": "^0.78.0",
+    "@earendil-works/pi-tui": "^0.78.0",
+    "@types/node": "^25.9.1",
+    "oxlint": "^1.67.0",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  }
 }

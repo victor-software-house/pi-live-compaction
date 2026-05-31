@@ -13,11 +13,11 @@
 
 import { describe, expect, it } from 'vitest';
 
-import type { FilesTouchedEntry } from '@shared/files-touched-core';
+import type { FilesTouchedEntry } from '@live-compaction/files-touched';
 import {
 	formatManifestOperations,
 	renderFilesTouchedManifestBlock,
-} from '@shared/files-touched-manifest';
+} from '@live-compaction/files-touched-manifest';
 
 function entry(
 	displayPath: string,

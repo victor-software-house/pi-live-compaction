@@ -8,7 +8,7 @@ import type {
 import { completeSimple, streamSimple as streamSimpleDefault } from '@earendil-works/pi-ai';
 import { convertToLlm } from '@earendil-works/pi-coding-agent';
 
-import { collectFilesTouched } from '@shared/files-touched-core';
+import { collectFilesTouched } from './files-touched';
 import type { AppendEntry } from './attempt-entry';
 import {
 	loadEffectiveBranchSummaryPromptContract,

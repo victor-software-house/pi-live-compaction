@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { convertToLlm, getAgentDir, serializeConversation } from '@earendil-works/pi-coding-agent';
 import { describe, expect, it } from 'vitest';
 
-import { renderFilesTouchedManifestBlock } from '@shared/files-touched-manifest';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
 import { DEFAULT_CONFIG } from '@live-compaction/config';
 import { fetchTaskStateSnapshot, runLiveCompaction } from '@live-compaction/index';
 import { SYSTEM_PROMPT } from '@live-compaction/summary-stream';

@@ -11,7 +11,7 @@
  * came out as rows of `undefined` in real sessions.
  */
 
-import type { FilesTouchedEntry } from './files-touched-core';
+import type { FilesTouchedEntry } from './files-touched';
 
 export const FILES_TOUCHED_HEADING = '## Files touched';
 export const FILES_TOUCHED_LEGEND = 'R=read, W=write, E=edit, M=move/rename, D=delete';
