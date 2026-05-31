@@ -22,7 +22,7 @@
 	"type": "module",
 	"packageManager": "pnpm@11.5.0",
 	"files": [
-		"extensions",
+		"src",
 		"examples",
 		"bin",
 		"README.md",
@@ -31,7 +31,7 @@
 	],
 	"pi": {
 		"extensions": [
-			"./extensions/live-compaction/index.ts"
+			"./src/index.ts"
 		]
 	},
 	"scripts": {

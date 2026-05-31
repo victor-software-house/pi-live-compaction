@@ -15,7 +15,7 @@ import type { FilesTouchedEntry } from '@live-compaction/files-touched';
 import {
 	formatManifestOperations,
 	renderFilesTouchedManifestBlock,
-} from '@live-compaction/files-touched-manifest';
+} from '@live-compaction/files-touched';
 import { describe, expect, it } from 'vitest';
 
 function entry(

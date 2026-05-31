@@ -17,8 +17,11 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
-import { collectFilesTouched, type FilesTouchedEntry } from '@live-compaction/files-touched';
-import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
+import {
+	collectFilesTouched,
+	type FilesTouchedEntry,
+	renderFilesTouchedManifestBlock,
+} from '@live-compaction/files-touched';
 import {
 	collectDiscardedFromFixture,
 	collectKeptTailFromFixture,

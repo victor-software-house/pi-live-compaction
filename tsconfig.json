@@ -13,10 +13,10 @@
 		"isolatedModules": true,
 		"verbatimModuleSyntax": true,
 		"paths": {
-			"@live-compaction/*": ["./extensions/live-compaction/*"],
+			"@live-compaction/*": ["./src/*"],
 			"@test/*": ["./test/*"]
 		}
 	},
-	"include": ["extensions/**/*.ts", "test/**/*.ts", "bin/**/*.ts", "vitest.config.ts"],
+	"include": ["src/**/*.ts", "test/**/*.ts", "bin/**/*.ts", "vitest.config.ts"],
 	"exclude": ["node_modules"]
 }

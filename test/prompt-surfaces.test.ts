@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { convertToLlm, getAgentDir, serializeConversation } from '@earendil-works/pi-coding-agent';
 import { DEFAULT_CONFIG } from '@live-compaction/config';
 
-import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched';
 import { fetchTaskStateSnapshot, runLiveCompaction } from '@live-compaction/index';
-import { SYSTEM_PROMPT } from '@live-compaction/summary-stream';
+import { SYSTEM_PROMPT } from '@live-compaction/summary';
 import {
 	buildBranchSummaryRenderVars,
 	buildRenderVars,
@@ -160,10 +160,7 @@ describe('prompt/template surfaces', () => {
 	});
 
 	it('renders packaged compaction prompt example directly', async () => {
-		const templatePath = path.join(
-			packageRoot,
-			'extensions/live-compaction/compaction-prompt.md.example',
-		);
+		const templatePath = path.join(packageRoot, 'examples/compaction-prompt.md.example');
 		const out = await renderCompactionTemplate(templatePath);
 
 		expectValidRenderedPrompt(out);
@@ -174,10 +171,7 @@ describe('prompt/template surfaces', () => {
 	});
 
 	it('renders packaged branch-summary prompt example directly', async () => {
-		const templatePath = path.join(
-			packageRoot,
-			'extensions/live-compaction/branch-summary-prompt.md.example',
-		);
+		const templatePath = path.join(packageRoot, 'examples/branch-summary-prompt.md.example');
 		const out = await renderBranchSummaryTemplate(templatePath);
 
 		expectValidRenderedPrompt(out);

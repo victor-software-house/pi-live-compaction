@@ -1,4 +1,4 @@
-import { SYSTEM_PROMPT } from '@live-compaction/summary-stream';
+import { SYSTEM_PROMPT } from '@live-compaction/summary';
 import { describe, expect, it } from 'vitest';
 
 describe('SYSTEM_PROMPT', () => {

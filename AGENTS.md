@@ -5,46 +5,47 @@ Live streaming compaction extension for Pi. Replaces Pi's built-in compaction wi
 ## Repo layout
 
 ```
-extensions/
-  live-compaction/       extension source (Pi entry: index.ts)
-    templates/           Liquid partials (_blocks.md, _contract.md)
-    *.ts                 core modules
-    *.md.example         default prompt/config examples
+src/                     extension source (Pi entry: src/index.ts)
+  index.ts               extension entry point
+  types.ts               shared runtime types
+  errors.ts              CompactionAbortedError
+  attempt-entry.ts       diagnostic logger
+  controller.ts          settings panel state machine
+  session-fixtures.ts    test/preview fixture builder
+  config/                config schema, file I/O, prompt contracts
+  preset/                preset matching + summarizer resolution
+  template/              Liquid template loading + render-var builders
+    templates/           shipped Liquid partials (_blocks.md, _contract.md)
+  summary/               LLM completion wiring (SYSTEM_PROMPT, streaming)
+  compaction/            runLiveCompaction handler + orchestrator + progress
+  branch/                runGroundedBranchSummaryAugmentation
+  command/               /live-compaction TUI settings panel
+  files-touched/         file-touch manifest extraction
 test/                    vitest suite (50 tests)
   fixtures/              test fixtures
   snapshots/             golden snapshots (tracked)
-examples/                9 declarative golden-file template examples
+examples/                prompt/config examples (9 declarative + .example files)
+  templates/             Liquid partials for the .example templates
 bin/                     preview and example-update scripts
 ```
 
 ## Key modules
 
-| File | Responsibility |
+| Path | Responsibility |
 |---|---|
-| `index.ts` | Extension entry — hooks `session:beforeCompact` + `session:beforeTree`, preset resolution, summary orchestration |
-| `compaction-chat-message.ts` | Live-streaming custom message in chat flow (renderer, context filter, cleanup) |
-| `summary-stream.ts` | Streaming LLM call with partial recovery on stream failure |
-| `template.ts` | Liquid template loading via `pi-template-kit` with frontmatter parsing |
-| `config.ts` | Scope-aware config (global/project), preset management, prompt resolution cascade |
-| `controller.ts` | State management, validation, settings panel data |
-| `command.ts` | `/live-compaction` TUI settings panel |
-| `attempt-entry.ts` | Diagnostic entry logger |
-| `files-touched.ts` | File-touch manifest extraction from session history |
-| `files-touched-manifest.ts` | Manifest rendering for compaction/branch summaries |
-| `session-fixtures.ts` | Session message construction helpers |
+| `src/index.ts` | Extension entry — thin wiring of hooks + command |
+| `src/compaction/handler.ts` | `runLiveCompaction` main handler |
+| `src/compaction/orchestrator.ts` | `summarizeWithResolvedModel`, `executeSummaryCall` |
+| `src/summary/stream.ts` | Streaming LLM call with partial recovery on stream failure |
+| `src/template/loader.ts` | Liquid template loading via `pi-template-kit` |
+| `src/config/` | Scope-aware config, preset management, prompt resolution cascade |
+| `src/controller.ts` | State management, validation, settings panel data |
+| `src/command/` | `/live-compaction` TUI settings panel |
+| `src/attempt-entry.ts` | Diagnostic entry logger |
+| `src/files-touched/` | File-touch manifest extraction from session history |
+| `src/session-fixtures.ts` | Session message construction helpers |
 
-## Module structure (planned extraction from `index.ts`)
-
-`index.ts` is 1174 lines bundling too many concerns. Extraction targets:
-
-| Section | Target | Status |
-|---|---|---|
-| Instruction parsing + preset matching | `preset.ts` | planned |
-| Model / summarizer resolution | `summarizer.ts` | planned |
-| `makeSummaryProgress` | `compaction-chat-message.ts` | done |
-| Summarization core + compaction handler | `compaction-handler.ts` | planned |
-| Branch summary handler | `branch-handler.ts` | planned |
-| Extension factory | stays in `index.ts` (thin wiring) | — |
+See `src/AGENTS.md` for full domain map.
 
 Rules: each module exports pure/factory functions, no circular imports back
 to `index.ts`, `RunDeps` injection stays for testability, extract one at a

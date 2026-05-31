@@ -30,7 +30,7 @@ import type { Message } from '@earendil-works/pi-ai';
 import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
 
 import type { FilesTouchedEntry } from '@live-compaction/files-touched';
-import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched-manifest';
+import { renderFilesTouchedManifestBlock } from '@live-compaction/files-touched';
 import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
 
 // ---------------------------------------------------------------------------
