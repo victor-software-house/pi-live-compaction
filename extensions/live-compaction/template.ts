@@ -19,7 +19,11 @@
  */
 
 import type { Message } from '@earendil-works/pi-ai';
-import { normalizeThinkingLevel } from '@live-compaction/config';
+import {
+	DEFAULT_BRANCH_SUMMARY_TEMPLATE_BODY,
+	DEFAULT_COMPACTION_TEMPLATE_BODY,
+	normalizeThinkingLevel,
+} from '@live-compaction/config';
 import type {
 	BranchSummaryRenderVars,
 	CompactionRenderVars,
@@ -292,4 +296,41 @@ export function buildBranchSummaryRenderVars(
 		},
 		meta: options.frontmatter ?? { extra: {} },
 	};
+}
+
+// ---------------------------------------------------------------------------
+// Built-in template singletons (lazy, reused across calls)
+// ---------------------------------------------------------------------------
+
+let builtInCompactionTemplate: CompactionTemplate | null = null;
+
+/**
+ * Built-in compaction template compiled once and reused for every
+ * fallback render. The body lives in config.ts so it can also be
+ * inspected by tests and the preview CLI without going through this
+ * module.
+ */
+export function getBuiltInCompactionTemplate(): CompactionTemplate {
+	if (!builtInCompactionTemplate) {
+		builtInCompactionTemplate = loadCompactionTemplateFromString(DEFAULT_COMPACTION_TEMPLATE_BODY, {
+			templatePath: '<built-in compaction template>',
+			templateDir: '/',
+		});
+	}
+	return builtInCompactionTemplate;
+}
+
+let builtInBranchSummaryTemplate: CompactionTemplate | null = null;
+
+export function getBuiltInBranchSummaryTemplate(): CompactionTemplate {
+	if (!builtInBranchSummaryTemplate) {
+		builtInBranchSummaryTemplate = loadCompactionTemplateFromString(
+			DEFAULT_BRANCH_SUMMARY_TEMPLATE_BODY,
+			{
+				templatePath: '<built-in branch summary template>',
+				templateDir: '/',
+			},
+		);
+	}
+	return builtInBranchSummaryTemplate;
 }
