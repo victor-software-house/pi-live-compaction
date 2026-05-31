@@ -23,22 +23,16 @@
  * inspection) can use the exact same rendering path.
  */
 
-import { readdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
-import process from "node:process";
+import { readdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
 
-import {
-	convertToLlm,
-	serializeConversation,
-} from "@earendil-works/pi-coding-agent";
-import type { Message } from "@earendil-works/pi-ai";
+import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
+import type { Message } from '@earendil-works/pi-ai';
 
-import type { FilesTouchedEntry } from "../extensions/_shared/files-touched-core";
-import { renderFilesTouchedManifestBlock } from "../extensions/_shared/files-touched-manifest";
-import {
-	buildRenderVars,
-	loadCompactionTemplate,
-} from "../extensions/live-compaction/template";
+import type { FilesTouchedEntry } from '@shared/files-touched-core';
+import { renderFilesTouchedManifestBlock } from '@shared/files-touched-manifest';
+import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -77,18 +71,18 @@ export interface ExampleCase {
 }
 
 export type ExampleMessage =
-	| { role: "user" | "assistant"; text: string }
-	| { role: "user" | "assistant" | "toolResult"; content: ContentBlock[] };
+	| { role: 'user' | 'assistant'; text: string }
+	| { role: 'user' | 'assistant' | 'toolResult'; content: ContentBlock[] };
 
 type ContentBlock =
-	| { type: "text"; text: string }
+	| { type: 'text'; text: string }
 	| {
-			type: "toolCall";
+			type: 'toolCall';
 			id: string;
 			name: string;
 			arguments: Record<string, unknown>;
 	  }
-	| { type: "toolResult"; toolCallId: string; output: string };
+	| { type: 'toolResult'; toolCallId: string; output: string };
 
 export interface ExampleFileTouched {
 	/** Operations badge: any subset of "RWEMD" (case insensitive). */
@@ -110,9 +104,7 @@ export interface ExampleDir {
 	expectedPath: string;
 }
 
-export async function discoverExamples(
-	examplesRoot: string,
-): Promise<ExampleDir[]> {
+export async function discoverExamples(examplesRoot: string): Promise<ExampleDir[]> {
 	let entries: string[];
 	try {
 		entries = await readdir(examplesRoot);
@@ -121,14 +113,14 @@ export async function discoverExamples(
 	}
 	const out: ExampleDir[] = [];
 	for (const entry of entries.sort()) {
-		if (entry.startsWith(".") || entry.startsWith("_")) continue;
+		if (entry.startsWith('.') || entry.startsWith('_')) continue;
 		const dir = path.join(examplesRoot, entry);
-		const templatePath = path.join(dir, "compaction-prompt.md");
-		const casePath = path.join(dir, "case.json");
-		const expectedPath = path.join(dir, "expected.md");
+		const templatePath = path.join(dir, 'compaction-prompt.md');
+		const casePath = path.join(dir, 'case.json');
+		const expectedPath = path.join(dir, 'expected.md');
 		try {
-			await readFile(templatePath, "utf8");
-			await readFile(casePath, "utf8");
+			await readFile(templatePath, 'utf8');
+			await readFile(casePath, 'utf8');
 		} catch {
 			continue; // not a complete example
 		}
@@ -138,7 +130,7 @@ export async function discoverExamples(
 }
 
 export async function loadCase(casePath: string): Promise<ExampleCase> {
-	const raw = await readFile(casePath, "utf8");
+	const raw = await readFile(casePath, 'utf8');
 	return JSON.parse(raw) as ExampleCase;
 }
 
@@ -150,10 +142,10 @@ export async function renderExample(example: ExampleDir): Promise<string> {
 
 	const discardedText = discardedMessages.length
 		? serializeConversation(convertToLlm(discardedMessages))
-		: "";
+		: '';
 	const keptTailText = keptTailMessages.length
 		? serializeConversation(convertToLlm(keptTailMessages))
-		: "";
+		: '';
 
 	const includeFilesTouched =
 		exampleCase.include_files_touched ??
@@ -186,21 +178,18 @@ export async function renderExample(example: ExampleDir): Promise<string> {
 
 export async function readExpected(example: ExampleDir): Promise<string | null> {
 	try {
-		return await readFile(example.expectedPath, "utf8");
+		return await readFile(example.expectedPath, 'utf8');
 	} catch {
 		return null;
 	}
 }
 
-export async function writeExpected(
-	example: ExampleDir,
-	rendered: string,
-): Promise<void> {
-	await writeFile(example.expectedPath, rendered, "utf8");
+export async function writeExpected(example: ExampleDir, rendered: string): Promise<void> {
+	await writeFile(example.expectedPath, rendered, 'utf8');
 }
 
 export function shouldUpdate(): boolean {
-	return process.env.UPDATE_EXAMPLES === "1";
+	return process.env.UPDATE_EXAMPLES === '1';
 }
 
 // ---------------------------------------------------------------------------
@@ -208,10 +197,10 @@ export function shouldUpdate(): boolean {
 // ---------------------------------------------------------------------------
 
 function toMessage(input: ExampleMessage): Message {
-	if ("text" in input) {
+	if ('text' in input) {
 		return {
 			role: input.role,
-			content: [{ type: "text", text: input.text }],
+			content: [{ type: 'text', text: input.text }],
 			timestamp: 0,
 		} as Message;
 	}
@@ -223,13 +212,13 @@ function toMessage(input: ExampleMessage): Message {
 }
 
 function toFilesTouchedEntry(entry: ExampleFileTouched): FilesTouchedEntry {
-	const ops = new Set<"read" | "write" | "edit" | "move" | "delete">();
+	const ops = new Set<'read' | 'write' | 'edit' | 'move' | 'delete'>();
 	const upper = entry.ops.toUpperCase();
-	if (upper.includes("R")) ops.add("read");
-	if (upper.includes("W")) ops.add("write");
-	if (upper.includes("E")) ops.add("edit");
-	if (upper.includes("M")) ops.add("move");
-	if (upper.includes("D")) ops.add("delete");
+	if (upper.includes('R')) ops.add('read');
+	if (upper.includes('W')) ops.add('write');
+	if (upper.includes('E')) ops.add('edit');
+	if (upper.includes('M')) ops.add('move');
+	if (upper.includes('D')) ops.add('delete');
 	return {
 		path: entry.path ?? `/abs/${entry.displayPath}`,
 		displayPath: entry.displayPath,

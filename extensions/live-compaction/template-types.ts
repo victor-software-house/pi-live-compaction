@@ -5,9 +5,9 @@
  * pulling the `pi-template-kit` runtime from `template.ts`.
  */
 
-import type { Message } from "@earendil-works/pi-ai";
+import type { Message } from '@earendil-works/pi-ai';
 
-import type { ThinkingLevel } from "./config";
+import type { ThinkingLevel } from './config';
 
 export interface CompactionTemplateFrontmatter {
 	preset?: string;

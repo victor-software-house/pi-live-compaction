@@ -1,10 +1,10 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomUUID } from 'node:crypto';
 
 import {
 	completeSimple,
 	streamSimple as streamSimpleDefault,
 	type Message,
-} from "@earendil-works/pi-ai";
+} from '@earendil-works/pi-ai';
 import {
 	CompactionSummaryMessageComponent,
 	convertToLlm,
@@ -13,15 +13,12 @@ import {
 	type SessionBeforeTreeEvent,
 	type SessionEntry,
 	serializeConversation,
-} from "@earendil-works/pi-coding-agent";
-import {
-	collectFilesTouched,
-	type FilesTouchedEntry,
-} from "../_shared/files-touched-core";
-import { renderFilesTouchedManifestBlock } from "../_shared/files-touched-manifest";
-import { appendCompactionAttemptEntry } from "./attempt-entry";
-import { CompactionAbortedError, isAbortError } from "./errors";
-import { registerLiveCompactionCommand } from "./command";
+} from '@earendil-works/pi-coding-agent';
+import { collectFilesTouched, type FilesTouchedEntry } from '@shared/files-touched-core';
+import { renderFilesTouchedManifestBlock } from '@shared/files-touched-manifest';
+import { appendCompactionAttemptEntry } from './attempt-entry';
+import { CompactionAbortedError, isAbortError } from './errors';
+import { registerLiveCompactionCommand } from './command';
 import {
 	CURRENT_PRESET_SENTINEL,
 	DEFAULT_BRANCH_SUMMARY_TEMPLATE_BODY,
@@ -35,7 +32,7 @@ import {
 	type PresetConfig,
 	resolveLiveCompactionPaths,
 	type ThinkingLevel,
-} from "./config";
+} from './config';
 import type {
 	LiveCompactionDetails,
 	HookContext,
@@ -47,7 +44,7 @@ import type {
 	RunDeps,
 	StreamSimple,
 	SummaryProgress,
-} from "./runtime-types";
+} from './runtime-types';
 import {
 	buildSummaryOptions,
 	buildSummaryRequestMessage,
@@ -56,14 +53,14 @@ import {
 	getTextFromAssistantResponse,
 	SYSTEM_PROMPT,
 	stripLeakedInternals,
-} from "./summary-stream";
+} from './summary-stream';
 import {
 	buildBranchSummaryRenderVars,
 	buildRenderVars,
 	type CompactionTemplate,
 	loadCompactionTemplate,
 	loadCompactionTemplateFromString,
-} from "./template";
+} from './template';
 
 // Re-exports for external consumers
 export type {
@@ -75,7 +72,7 @@ export type {
 	PromptKind,
 	PromptResolution,
 	ThinkingLevel,
-} from "./config";
+} from './config';
 export {
 	CURRENT_PRESET_SENTINEL,
 	DEFAULT_COMPACTION_PROMPT_CONTRACT,
@@ -89,7 +86,7 @@ export {
 	normalizeOptionalText,
 	normalizeThinkingLevel,
 	parseConfig,
-} from "./config";
+} from './config';
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -118,18 +115,16 @@ const DEFAULT_DEPS: RunDeps = {
 // ---------------------------------------------------------------------------
 
 function sha256(text: string): string {
-	return createHash("sha256").update(text).digest("hex");
+	return createHash('sha256').update(text).digest('hex');
 }
 
-export function parseCompactInstructions(
-	text?: string,
-): ParsedCompactInstructions {
-	const trimmed = text?.trim() ?? "";
+export function parseCompactInstructions(text?: string): ParsedCompactInstructions {
+	const trimmed = text?.trim() ?? '';
 	if (!trimmed) {
 		return { usesPresetDirective: false };
 	}
 
-	if (!trimmed.startsWith("--preset") && !trimmed.startsWith("-p")) {
+	if (!trimmed.startsWith('--preset') && !trimmed.startsWith('-p')) {
 		return {
 			usesPresetDirective: false,
 			focusText: trimmed,
@@ -153,23 +148,17 @@ export function parseCompactInstructions(
 // ---------------------------------------------------------------------------
 
 function normalizePresetKey(value: string): string {
-	return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+	return value.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-export function resolvePresetMatch(
-	config: LiveCompactionConfig,
-	query: string,
-): PresetMatchResult {
+export function resolvePresetMatch(config: LiveCompactionConfig, query: string): PresetMatchResult {
 	const normalizedQuery = normalizePresetKey(query);
 	if (!normalizedQuery) {
-		return { kind: "unmatched" };
+		return { kind: 'unmatched' };
 	}
 
-	if (
-		normalizedQuery === "current" ||
-		normalizedQuery === CURRENT_PRESET_SENTINEL
-	) {
-		return { kind: "matched", name: CURRENT_PRESET_SENTINEL };
+	if (normalizedQuery === 'current' || normalizedQuery === CURRENT_PRESET_SENTINEL) {
+		return { kind: 'matched', name: CURRENT_PRESET_SENTINEL };
 	}
 
 	const exactKey = Object.keys(config.presets).find(
@@ -177,7 +166,7 @@ export function resolvePresetMatch(
 	);
 	if (exactKey) {
 		return {
-			kind: "matched",
+			kind: 'matched',
 			name: exactKey,
 			preset: config.presets[exactKey],
 		};
@@ -188,46 +177,42 @@ export function resolvePresetMatch(
 	);
 	if (prefixMatches.length === 1) {
 		return {
-			kind: "matched",
+			kind: 'matched',
 			name: prefixMatches[0],
 			preset: config.presets[prefixMatches[0]],
 		};
 	}
 	if (prefixMatches.length > 1) {
-		return { kind: "ambiguous" };
+		return { kind: 'ambiguous' };
 	}
 
-	return { kind: "unmatched" };
+	return { kind: 'unmatched' };
 }
 
 // ---------------------------------------------------------------------------
 // Model / summarizer resolution
 // ---------------------------------------------------------------------------
 
-export function getEffectiveThinkingLevel(
-	branchEntries: SessionEntry[],
-): ThinkingLevel {
+export function getEffectiveThinkingLevel(branchEntries: SessionEntry[]): ThinkingLevel {
 	for (let i = branchEntries.length - 1; i >= 0; i--) {
 		const entry = branchEntries[i];
-		if (entry.type === "thinking_level_change") {
+		if (entry.type === 'thinking_level_change') {
 			const level = normalizeThinkingLevel(entry.thinkingLevel);
 			if (level) {
 				return level;
 			}
 		}
 	}
-	return "off";
+	return 'off';
 }
 
 function parseProviderModel(value: string): {
 	provider: string;
 	modelId: string;
 } {
-	const slashIndex = value.indexOf("/");
+	const slashIndex = value.indexOf('/');
 	if (slashIndex < 0) {
-		throw new Error(
-			`Invalid model format '${value}': expected 'provider/model-id'`,
-		);
+		throw new Error(`Invalid model format '${value}': expected 'provider/model-id'`);
 	}
 	return {
 		provider: value.slice(0, slashIndex),
@@ -237,7 +222,7 @@ function parseProviderModel(value: string): {
 
 function getRegisteredStreamSimple(
 	ctx: HookContext,
-	model: ResolvedSummarizer["model"],
+	model: ResolvedSummarizer['model'],
 ): StreamSimple | undefined {
 	const registry = ctx.modelRegistry as unknown as {
 		registeredProviders?: Map<string, { streamSimple?: StreamSimple }>;
@@ -276,13 +261,11 @@ export async function resolvePresetSummarizer(
 	const match = resolvePresetMatch(config, presetQuery);
 
 	switch (match.kind) {
-		case "ambiguous":
-			throw new Error(
-				`Ambiguous preset query '${presetQuery}': matches multiple presets`,
-			);
-		case "unmatched":
+		case 'ambiguous':
+			throw new Error(`Ambiguous preset query '${presetQuery}': matches multiple presets`);
+		case 'unmatched':
 			throw new Error(`No preset matches '${presetQuery}'`);
-		case "matched":
+		case 'matched':
 			break;
 	}
 
@@ -305,15 +288,15 @@ export async function resolvePresetSummarizer(
 	}
 
 	const { provider, modelId } = parseProviderModel(match.preset.model);
-	const model = ctx.modelRegistry.getAll().find(
-		(m) =>
-			m.provider.toLowerCase() === provider.toLowerCase() &&
-			m.id.toLowerCase() === modelId.toLowerCase(),
-	);
-	if (!model) {
-		throw new Error(
-			`Model '${match.preset.model}' not found in model registry`,
+	const model = ctx.modelRegistry
+		.getAll()
+		.find(
+			(m) =>
+				m.provider.toLowerCase() === provider.toLowerCase() &&
+				m.id.toLowerCase() === modelId.toLowerCase(),
 		);
+	if (!model) {
+		throw new Error(`Model '${match.preset.model}' not found in model registry`);
 	}
 
 	const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
@@ -331,13 +314,10 @@ export async function resolvePresetSummarizer(
 }
 
 function describeConfiguredFallback(config: LiveCompactionConfig): string {
-	if (
-		config.fallbackPreset &&
-		config.fallbackPreset !== CURRENT_PRESET_SENTINEL
-	) {
+	if (config.fallbackPreset && config.fallbackPreset !== CURRENT_PRESET_SENTINEL) {
 		return `preset '${config.fallbackPreset}'`;
 	}
-	return "the current session model";
+	return 'the current session model';
 }
 
 function describePresetFallback(error: unknown): string {
@@ -368,17 +348,13 @@ async function resolveConfiguredFallbackSummarizer(
 export {
 	formatManifestOperations,
 	renderFilesTouchedManifestBlock,
-} from "../_shared/files-touched-manifest";
+} from '@shared/files-touched-manifest';
 
 // ---------------------------------------------------------------------------
 // Notify helper
 // ---------------------------------------------------------------------------
 
-function notify(
-	ctx: HookContext,
-	message: string,
-	level: NotifyLevel = "warning",
-): void {
+function notify(ctx: HookContext, message: string, level: NotifyLevel = 'warning'): void {
 	if (ctx.hasUI) {
 		ctx.ui.notify(message, level);
 	}
@@ -392,7 +368,7 @@ function boundTaskStateBlock(value: string | undefined): string | undefined {
 }
 
 export function fetchTaskStateSnapshot(
-	events: ExtensionAPI["events"],
+	events: ExtensionAPI['events'],
 	timeoutMs = 750,
 ): Promise<string | undefined> {
 	const requestId = randomUUID();
@@ -410,7 +386,7 @@ export function fetchTaskStateSnapshot(
 			const reply = raw as { success?: boolean; data?: { markdown?: string }; error?: string };
 			done(reply.success ? reply.data?.markdown : undefined);
 		});
-		events.emit("tasks:rpc:snapshot", { requestId, consumer: "live-compaction" });
+		events.emit('tasks:rpc:snapshot', { requestId, consumer: 'live-compaction' });
 	});
 }
 
@@ -420,7 +396,7 @@ function makeSummaryProgress(ctx: HookContext): SummaryProgress | undefined {
 		return undefined;
 	}
 
-	const key = "live-compaction";
+	const key = 'live-compaction';
 	let lastUpdate = 0;
 	let started = false;
 	let tokensBefore = 0;
@@ -430,15 +406,15 @@ function makeSummaryProgress(ctx: HookContext): SummaryProgress | undefined {
 			key,
 			() => {
 				const component = new CompactionSummaryMessageComponent({
-					role: "compactionSummary",
-					summary: summary.trimEnd() || "_Waiting for model output…_",
+					role: 'compactionSummary',
+					summary: summary.trimEnd() || '_Waiting for model output…_',
 					tokensBefore,
 					timestamp: Date.now(),
 				});
 				component.setExpanded(true);
 				return component;
 			},
-			{ placement: "aboveEditor" },
+			{ placement: 'aboveEditor' },
 		);
 	};
 
@@ -454,14 +430,14 @@ function makeSummaryProgress(ctx: HookContext): SummaryProgress | undefined {
 			tokensBefore = compactedTokensBefore;
 			ctx.ui.setStatus?.(key, `compacting with ${modelLabel}`);
 			ctx.ui.setWorkingMessage?.(`Compacting with ${modelLabel}…`);
-			setCompactionWidget("");
+			setCompactionWidget('');
 		},
 		update(text: string) {
 			if (!started) return;
 			const now = Date.now();
 			if (now - lastUpdate < 150) return;
 			lastUpdate = now;
-			const lineCount = text ? text.split("\n").length : 0;
+			const lineCount = text ? text.split('\n').length : 0;
 			ctx.ui.setStatus?.(key, `compacting · ${lineCount} lines`);
 			setCompactionWidget(text);
 		},
@@ -471,7 +447,7 @@ function makeSummaryProgress(ctx: HookContext): SummaryProgress | undefined {
 		fail(message: string) {
 			ctx.ui.setStatus?.(key, `compaction failed: ${message}`);
 			ctx.ui.setWidget?.(key, [`Grounded compaction failed: ${message}`], {
-				placement: "aboveEditor",
+				placement: 'aboveEditor',
 			});
 			ctx.ui.setWorkingMessage?.();
 		},
@@ -496,15 +472,13 @@ function collectKeptTailMessages(
 	firstKeptEntryId: string | undefined,
 ): PreparedMessages {
 	if (!firstKeptEntryId) return [];
-	const startIndex = branchEntries.findIndex(
-		(e) => e.id === firstKeptEntryId,
-	);
+	const startIndex = branchEntries.findIndex((e) => e.id === firstKeptEntryId);
 	if (startIndex < 0) return [];
 
 	const tail: PreparedMessages = [];
 	for (let i = startIndex; i < branchEntries.length; i++) {
 		const entry = branchEntries[i];
-		if (entry.type === "message") {
+		if (entry.type === 'message') {
 			tail.push(entry.message);
 		}
 		// custom_message / branch_summary / compaction in the kept tail are rare
@@ -523,15 +497,12 @@ function collectKeptTailMessages(
 let builtInCompactionTemplate: CompactionTemplate | null = null;
 function getBuiltInCompactionTemplate(): CompactionTemplate {
 	if (!builtInCompactionTemplate) {
-		builtInCompactionTemplate = loadCompactionTemplateFromString(
-			DEFAULT_COMPACTION_TEMPLATE_BODY,
-			{
-				templatePath: "<built-in compaction template>",
-				// Synthetic dir; the built-in body has no `{% include %}`s, so
-				// partial resolution never fires.
-				templateDir: "/",
-			},
-		);
+		builtInCompactionTemplate = loadCompactionTemplateFromString(DEFAULT_COMPACTION_TEMPLATE_BODY, {
+			templatePath: '<built-in compaction template>',
+			// Synthetic dir; the built-in body has no `{% include %}`s, so
+			// partial resolution never fires.
+			templateDir: '/',
+		});
 	}
 	return builtInCompactionTemplate;
 }
@@ -542,8 +513,8 @@ function getBuiltInBranchSummaryTemplate(): CompactionTemplate {
 		builtInBranchSummaryTemplate = loadCompactionTemplateFromString(
 			DEFAULT_BRANCH_SUMMARY_TEMPLATE_BODY,
 			{
-				templatePath: "<built-in branch summary template>",
-				templateDir: "/",
+				templatePath: '<built-in branch summary template>',
+				templateDir: '/',
 			},
 		);
 	}
@@ -562,34 +533,37 @@ function getBuiltInBranchSummaryTemplate(): CompactionTemplate {
  *      template file is configured or rendering fails
  *   4. issues the single completion request
  */
-async function executeSummaryCall(params: {
-	summarizer: ResolvedSummarizer;
-	template: CompactionTemplate | null;
-	promptContract: string;
-	discardedMessages: PreparedMessages;
-	keptTailMessages: PreparedMessages;
-	previousSummary?: string;
-	focusText?: string;
-	focusInput?: string;
-	filesTouchedBlock?: string;
-	taskStateBlock?: string;
-	reserveTokens: number;
-	tokensBefore: number;
-	signal: AbortSignal;
-	attemptId?: string;
-	notify?: (message: string, level: NotifyLevel) => void;
-	progress?: SummaryProgress;
-}, deps: RunDeps): Promise<string> {
+async function executeSummaryCall(
+	params: {
+		summarizer: ResolvedSummarizer;
+		template: CompactionTemplate | null;
+		promptContract: string;
+		discardedMessages: PreparedMessages;
+		keptTailMessages: PreparedMessages;
+		previousSummary?: string;
+		focusText?: string;
+		focusInput?: string;
+		filesTouchedBlock?: string;
+		taskStateBlock?: string;
+		reserveTokens: number;
+		tokensBefore: number;
+		signal: AbortSignal;
+		attemptId?: string;
+		notify?: (message: string, level: NotifyLevel) => void;
+		progress?: SummaryProgress;
+	},
+	deps: RunDeps,
+): Promise<string> {
 	if (params.signal.aborted) {
 		throw new CompactionAbortedError();
 	}
 
 	const discardedText = params.discardedMessages.length
 		? serializeConversation(convertToLlm(params.discardedMessages))
-		: "";
+		: '';
 	const keptTailText = params.keptTailMessages.length
 		? serializeConversation(convertToLlm(params.keptTailMessages))
-		: "";
+		: '';
 
 	let promptText: string | undefined;
 
@@ -612,7 +586,7 @@ async function executeSummaryCall(params: {
 			const message = error instanceof Error ? error.message : String(error);
 			params.notify?.(
 				`Compaction template failed (${message}). Falling back to default block layout.`,
-				"warning",
+				'warning',
 			);
 			promptText = undefined;
 		}
@@ -649,7 +623,7 @@ async function executeSummaryCall(params: {
 	});
 
 	appendCompactionAttemptEntry(deps.appendEntry, params.attemptId, {
-		event: "request_rendered",
+		event: 'request_rendered',
 		model: `${params.summarizer.model.provider}/${params.summarizer.model.id}`,
 		thinkingLevel: params.summarizer.reasoningLevel,
 		focusInput: params.focusInput,
@@ -680,28 +654,28 @@ async function executeSummaryCall(params: {
 		params.tokensBefore,
 	);
 
-	if (params.signal.aborted || response.stopReason === "aborted") {
+	if (params.signal.aborted || response.stopReason === 'aborted') {
 		throw new CompactionAbortedError();
 	}
 
 	const recoveredDiagnostic = response.diagnostics?.find(
-		(diagnostic) => diagnostic.type === "live-compaction-stream-recovered",
+		(diagnostic) => diagnostic.type === 'live-compaction-stream-recovered',
 	);
 	if (recoveredDiagnostic) {
 		appendCompactionAttemptEntry(deps.appendEntry, params.attemptId, {
-			event: "stream_recovered",
+			event: 'stream_recovered',
 			error: recoveredDiagnostic.error,
 			recoveredChars: getTextFromAssistantResponse(response).length,
 		});
 	}
 
-	if (response.stopReason === "error") {
-		throw new Error(response.errorMessage || "Summarization failed");
+	if (response.stopReason === 'error') {
+		throw new Error(response.errorMessage || 'Summarization failed');
 	}
 
 	const text = getTextFromAssistantResponse(response);
 	if (!text) {
-		throw new Error("Summarization returned empty output");
+		throw new Error('Summarization returned empty output');
 	}
 
 	return stripLeakedInternals(text);
@@ -804,21 +778,11 @@ function buildSuccessResult(
 				...(chooseSummaryTransport(summarizer) !== undefined
 					? { transport: chooseSummaryTransport(summarizer) }
 					: {}),
-				...(metadata?.focusInput !== undefined
-					? { focusInput: metadata.focusInput }
-					: {}),
-				...(metadata?.focusText !== undefined
-					? { focusText: metadata.focusText }
-					: {}),
-				...(metadata?.presetQuery !== undefined
-					? { presetQuery: metadata.presetQuery }
-					: {}),
-				...(metadata?.attemptId !== undefined
-					? { attemptId: metadata.attemptId }
-					: {}),
-				...(metadata?.transport !== undefined
-					? { transport: metadata.transport }
-					: {}),
+				...(metadata?.focusInput !== undefined ? { focusInput: metadata.focusInput } : {}),
+				...(metadata?.focusText !== undefined ? { focusText: metadata.focusText } : {}),
+				...(metadata?.presetQuery !== undefined ? { presetQuery: metadata.presetQuery } : {}),
+				...(metadata?.attemptId !== undefined ? { attemptId: metadata.attemptId } : {}),
+				...(metadata?.transport !== undefined ? { transport: metadata.transport } : {}),
 			} satisfies LiveCompactionDetails,
 		},
 	};
@@ -832,10 +796,7 @@ export async function runGroundedBranchSummaryAugmentation(
 	event: SessionBeforeTreeEvent,
 	ctx: HookContext,
 	deps: RunDeps = DEFAULT_DEPS,
-): Promise<
-	| { customInstructions: string; replaceInstructions: boolean }
-	| undefined
-> {
+): Promise<{ customInstructions: string; replaceInstructions: boolean } | undefined> {
 	if (
 		event.signal.aborted ||
 		!event.preparation.userWantsSummary ||
@@ -852,8 +813,7 @@ export async function runGroundedBranchSummaryAugmentation(
 		// contract for backward compat.
 		const paths = deps.resolvePaths(ctx.cwd);
 		const templatePath =
-			paths.project?.branchSummaryPromptPath ??
-			paths.global.branchSummaryPromptPath;
+			paths.project?.branchSummaryPromptPath ?? paths.global.branchSummaryPromptPath;
 		let template: CompactionTemplate | null = null;
 		try {
 			template = await deps.loadCompactionTemplate(templatePath);
@@ -862,7 +822,7 @@ export async function runGroundedBranchSummaryAugmentation(
 			notify(
 				ctx,
 				`Failed to load branch-summary template ${templatePath}: ${message}. Falling back to built-in.`,
-				"warning",
+				'warning',
 			);
 			template = null;
 		}
@@ -871,17 +831,14 @@ export async function runGroundedBranchSummaryAugmentation(
 		// as a render var (and so the legacy non-template path keeps working).
 		const filesTouchedBlock = config.includeFilesTouched.inBranchSummary
 			? renderFilesTouchedManifestBlock(
-					deps.collectFilesTouched(
-						event.preparation.entriesToSummarize,
-						ctx.cwd,
-					),
+					deps.collectFilesTouched(event.preparation.entriesToSummarize, ctx.cwd),
 				) || undefined
 			: undefined;
 
 		// Collect raw branch messages so the template can iterate them.
 		const branchEntryMessages: Message[] = [];
 		for (const entry of event.preparation.entriesToSummarize) {
-			if (entry.type === "message") {
+			if (entry.type === 'message') {
 				branchEntryMessages.push(entry.message as unknown as Message);
 			}
 		}
@@ -903,15 +860,13 @@ export async function runGroundedBranchSummaryAugmentation(
 				branchEntryMessages,
 				frontmatter: renderTemplate.frontmatter,
 			});
-			promptText = renderTemplate.render(
-				vars as unknown as Record<string, unknown>,
-			);
+			promptText = renderTemplate.render(vars as unknown as Record<string, unknown>);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
 			notify(
 				ctx,
 				`Branch-summary template render failed (${message}). Falling back to legacy assembly.`,
-				"warning",
+				'warning',
 			);
 			promptText = undefined;
 		}
@@ -932,7 +887,7 @@ export async function runGroundedBranchSummaryAugmentation(
 			if (filesTouchedBlock) {
 				sections.push(`## Files touched context\n\n${filesTouchedBlock}`);
 			}
-			promptText = sections.join("\n\n").trim();
+			promptText = sections.join('\n\n').trim();
 		}
 
 		if (!promptText.trim()) {
@@ -952,7 +907,7 @@ export async function runGroundedBranchSummaryAugmentation(
 		}
 
 		const message = error instanceof Error ? error.message : String(error);
-		notify(ctx, `Branch summary augmentation failed: ${message}`, "warning");
+		notify(ctx, `Branch summary augmentation failed: ${message}`, 'warning');
 		return undefined;
 	}
 }
@@ -980,9 +935,7 @@ export async function runLiveCompaction(
 	try {
 		const config = await deps.loadConfig(ctx.cwd);
 		const promptContract = await deps.loadCompactionPrompt(ctx.cwd);
-		const parsedInstructions = parseCompactInstructions(
-			event.customInstructions,
-		);
+		const parsedInstructions = parseCompactInstructions(event.customInstructions);
 
 		// Resolve the active prompt template (project override beats global).
 		// A null template means "use the fallback block layout"; pi continues to
@@ -996,16 +949,14 @@ export async function runLiveCompaction(
 			attemptId,
 		};
 		appendCompactionAttemptEntry(deps.appendEntry, attemptId, {
-			event: "start",
+			event: 'start',
 			focusInput: event.customInstructions,
 			focusText: parsedInstructions.focusText,
 			presetQuery: parsedInstructions.presetQuery,
 			tokensBefore: event.preparation.tokensBefore,
 			firstKeptEntryId: event.preparation.firstKeptEntryId,
 		});
-		const templatePath =
-			paths.project?.compactionPromptPath ??
-			paths.global.compactionPromptPath;
+		const templatePath = paths.project?.compactionPromptPath ?? paths.global.compactionPromptPath;
 		let template: CompactionTemplate | null = null;
 		try {
 			template = await deps.loadCompactionTemplate(templatePath);
@@ -1014,21 +965,17 @@ export async function runLiveCompaction(
 			notify(
 				ctx,
 				`Failed to load compaction template ${templatePath}: ${message}. Falling back to default block layout.`,
-				"warning",
+				'warning',
 			);
 			template = null;
 		}
-		const notifyHook = (message: string, level: NotifyLevel) =>
-			notify(ctx, message, level);
+		const notifyHook = (message: string, level: NotifyLevel) => notify(ctx, message, level);
 		const progress = makeSummaryProgress(ctx);
 
 		// Frontmatter can override defaultPreset/thinking. Explicit /compact
 		// --preset still wins; we only use the template's preset when the
 		// directive does not specify one.
-		if (
-			template?.frontmatter.preset &&
-			!parsedInstructions.usesPresetDirective
-		) {
+		if (template?.frontmatter.preset && !parsedInstructions.usesPresetDirective) {
 			parsedInstructions.usesPresetDirective = true;
 			parsedInstructions.presetQuery = template.frontmatter.preset;
 		}
@@ -1047,42 +994,29 @@ export async function runLiveCompaction(
 		// shallow copy of the config so the rest of the resolution code can
 		// stay unchanged.
 		let effectiveConfig = config;
-		if (
-			config.inheritSessionModel &&
-			!parsedInstructions.usesPresetDirective
-		) {
+		if (config.inheritSessionModel && !parsedInstructions.usesPresetDirective) {
 			effectiveConfig = { ...config, defaultPreset: CURRENT_PRESET_SENTINEL };
 		}
 
 		// Build optional files-touched context
 		const filesTouchedBlock = config.includeFilesTouched.inCompactionSummary
-			? renderFilesTouchedManifestBlock(
-					deps.collectFilesTouched(event.branchEntries, ctx.cwd),
-				) || undefined
+			? renderFilesTouchedManifestBlock(deps.collectFilesTouched(event.branchEntries, ctx.cwd)) ||
+				undefined
 			: undefined;
 
 		const taskStateBlock = boundTaskStateBlock(await deps.fetchTaskState?.());
 
 		// Strip any previously appended manifest tails from the prior summary
-		const previousSummary = normalizeOptionalText(
-			event.preparation.previousSummary,
-		);
+		const previousSummary = normalizeOptionalText(event.preparation.previousSummary);
 
 		// --- Preset path: explicit --preset in /compact args ---
 		let skipDefaultPreset = false;
-		if (
-			parsedInstructions.usesPresetDirective &&
-			parsedInstructions.presetQuery
-		) {
+		if (parsedInstructions.usesPresetDirective && parsedInstructions.presetQuery) {
 			try {
 				const summarizer =
 					parsedInstructions.presetQuery === CURRENT_PRESET_SENTINEL
 						? await resolveDefaultSummarizer(ctx, event.branchEntries)
-						: await resolvePresetSummarizer(
-								ctx,
-								config,
-								parsedInstructions.presetQuery,
-							);
+						: await resolvePresetSummarizer(ctx, config, parsedInstructions.presetQuery);
 				const summary = await summarizeWithResolvedModel(
 					{
 						event,
@@ -1102,24 +1036,24 @@ export async function runLiveCompaction(
 				);
 				progress?.finish();
 				appendCompactionAttemptEntry(deps.appendEntry, attemptId, {
-					event: "success",
+					event: 'success',
 					summaryChars: summary.length,
 				});
 				return buildSuccessResult(event, summary, summarizer, attemptMetadata);
 			} catch (error) {
 				progress?.finish();
 				if (isAbortError(error)) {
-					appendCompactionAttemptEntry(deps.appendEntry, attemptId, { event: "aborted" });
+					appendCompactionAttemptEntry(deps.appendEntry, attemptId, { event: 'aborted' });
 					return { cancel: true };
 				}
 				appendCompactionAttemptEntry(deps.appendEntry, attemptId, {
-					event: "preset_failed",
+					event: 'preset_failed',
 					error: error instanceof Error ? error.message : String(error),
 				});
 				notify(
 					ctx,
 					`Preset compaction failed (${describePresetFallback(error)}). Falling back to ${describeConfiguredFallback(config)}.`,
-					"warning",
+					'warning',
 				);
 				skipDefaultPreset = true;
 			}
@@ -1127,7 +1061,7 @@ export async function runLiveCompaction(
 			notify(
 				ctx,
 				`Malformed preset directive. Falling back to ${describeConfiguredFallback(config)}.`,
-				"warning",
+				'warning',
 			);
 			skipDefaultPreset = true;
 		}
@@ -1144,10 +1078,7 @@ export async function runLiveCompaction(
 					parsedInstructions.presetQuery,
 				);
 			} else if (effectiveConfig.defaultPreset === CURRENT_PRESET_SENTINEL) {
-				summarizer = await resolveDefaultSummarizer(
-					ctx,
-					event.branchEntries,
-				);
+				summarizer = await resolveDefaultSummarizer(ctx, event.branchEntries);
 			} else {
 				try {
 					summarizer = await resolvePresetSummarizer(
@@ -1162,7 +1093,7 @@ export async function runLiveCompaction(
 					notify(
 						ctx,
 						`Default preset '${effectiveConfig.defaultPreset}' failed (${describePresetFallback(error)}). Falling back to ${describeConfiguredFallback(effectiveConfig)}.`,
-						"warning",
+						'warning',
 					);
 					summarizer = await resolveConfiguredFallbackSummarizer(
 						ctx,
@@ -1192,39 +1123,33 @@ export async function runLiveCompaction(
 			);
 			progress?.finish();
 			appendCompactionAttemptEntry(deps.appendEntry, attemptId, {
-				event: "success",
+				event: 'success',
 				summaryChars: summary.length,
 			});
 			return buildSuccessResult(event, summary, summarizer, attemptMetadata);
 		} catch (error) {
 			if (isAbortError(error)) {
 				progress?.finish();
-				appendCompactionAttemptEntry(deps.appendEntry, attemptId, { event: "aborted" });
+				appendCompactionAttemptEntry(deps.appendEntry, attemptId, { event: 'aborted' });
 				return { cancel: true };
 			}
 			const message = error instanceof Error ? error.message : String(error);
 			progress?.fail(message);
 			appendCompactionAttemptEntry(deps.appendEntry, attemptId, {
-				event: "failed",
+				event: 'failed',
 				error: message,
 			});
-			notify(ctx, `Grounded compaction failed: ${message}`, "warning");
-			return parsedInstructions.usesPresetDirective
-				? { cancel: true }
-				: undefined;
+			notify(ctx, `Grounded compaction failed: ${message}`, 'warning');
+			return parsedInstructions.usesPresetDirective ? { cancel: true } : undefined;
 		}
 	} catch (error) {
 		if (isAbortError(error) || event.signal.aborted) {
 			return { cancel: true };
 		}
 		const message = error instanceof Error ? error.message : String(error);
-		notify(ctx, `Grounded compaction failed: ${message}`, "warning");
-		const parsedInstructions = parseCompactInstructions(
-			event.customInstructions,
-		);
-		return parsedInstructions.usesPresetDirective
-			? { cancel: true }
-			: undefined;
+		notify(ctx, `Grounded compaction failed: ${message}`, 'warning');
+		const parsedInstructions = parseCompactInstructions(event.customInstructions);
+		return parsedInstructions.usesPresetDirective ? { cancel: true } : undefined;
 	}
 }
 
@@ -1235,7 +1160,7 @@ export async function runLiveCompaction(
 export default function liveCompactionExtension(pi: ExtensionAPI): void {
 	registerLiveCompactionCommand(pi);
 
-	pi.on("session_before_compact", async (event, ctx) => {
+	pi.on('session_before_compact', async (event, ctx) => {
 		return runLiveCompaction(event, ctx, {
 			...DEFAULT_DEPS,
 			fetchTaskState: () => fetchTaskStateSnapshot(pi.events),
@@ -1243,7 +1168,7 @@ export default function liveCompactionExtension(pi: ExtensionAPI): void {
 		});
 	});
 
-	pi.on("session_before_tree", async (event, ctx) => {
+	pi.on('session_before_tree', async (event, ctx) => {
 		return runGroundedBranchSummaryAugmentation(event, ctx);
 	});
 }

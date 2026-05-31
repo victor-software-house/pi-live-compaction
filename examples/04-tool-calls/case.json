@@ -1,49 +1,48 @@
 {
-  "description": "Discarded span with a real tool-call/tool-result loop; main template includes a sibling _blocks partial.",
-  "files_touched": [
-    { "ops": "R", "displayPath": "README.md" },
-    { "ops": "RE", "displayPath": "src/index.ts" }
-  ],
-  "discarded": [
-    { "role": "user", "text": "Read README.md then patch src/index.ts to export a hello() function." },
-    {
-      "role": "assistant",
-      "content": [
-        { "type": "text", "text": "Reading README.md first." },
-        { "type": "toolCall", "id": "t1", "name": "read", "arguments": { "path": "README.md" } }
-      ]
-    },
-    {
-      "role": "toolResult",
-      "content": [
-        { "type": "toolResult", "toolCallId": "t1", "output": "# Project\nA tiny library." }
-      ]
-    },
-    {
-      "role": "assistant",
-      "content": [
-        { "type": "text", "text": "Patching src/index.ts." },
-        {
-          "type": "toolCall",
-          "id": "t2",
-          "name": "edit",
-          "arguments": {
-            "path": "src/index.ts",
-            "edits": [
-              { "oldText": "// entry", "newText": "export function hello() { return 'hi'; }" }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "role": "toolResult",
-      "content": [
-        { "type": "toolResult", "toolCallId": "t2", "output": "Edited src/index.ts" }
-      ]
-    }
-  ],
-  "kept_tail": [
-    { "role": "user", "text": "Next: add a vitest spec for hello()." }
-  ]
+	"description": "Discarded span with a real tool-call/tool-result loop; main template includes a sibling _blocks partial.",
+	"files_touched": [
+		{ "ops": "R", "displayPath": "README.md" },
+		{ "ops": "RE", "displayPath": "src/index.ts" }
+	],
+	"discarded": [
+		{
+			"role": "user",
+			"text": "Read README.md then patch src/index.ts to export a hello() function."
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{ "type": "text", "text": "Reading README.md first." },
+				{ "type": "toolCall", "id": "t1", "name": "read", "arguments": { "path": "README.md" } }
+			]
+		},
+		{
+			"role": "toolResult",
+			"content": [
+				{ "type": "toolResult", "toolCallId": "t1", "output": "# Project\nA tiny library." }
+			]
+		},
+		{
+			"role": "assistant",
+			"content": [
+				{ "type": "text", "text": "Patching src/index.ts." },
+				{
+					"type": "toolCall",
+					"id": "t2",
+					"name": "edit",
+					"arguments": {
+						"path": "src/index.ts",
+						"edits": [
+							{ "oldText": "// entry", "newText": "export function hello() { return 'hi'; }" }
+						]
+					}
+				}
+			]
+		},
+		{
+			"role": "toolResult",
+			"content": [{ "type": "toolResult", "toolCallId": "t2", "output": "Edited src/index.ts" }]
+		}
+	],
+	"kept_tail": [{ "role": "user", "text": "Next: add a vitest spec for hello()." }]
 }

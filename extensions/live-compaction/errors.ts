@@ -1,7 +1,7 @@
 export class CompactionAbortedError extends Error {
 	constructor() {
-		super("Compaction aborted");
-		this.name = "CompactionAbortedError";
+		super('Compaction aborted');
+		this.name = 'CompactionAbortedError';
 	}
 }
 

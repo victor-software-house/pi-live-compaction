@@ -1,7 +1,4 @@
-import type {
-	ExtensionCommandContext,
-	ExtensionContext,
-} from "@earendil-works/pi-coding-agent";
+import type { ExtensionCommandContext, ExtensionContext } from '@earendil-works/pi-coding-agent';
 
 import {
 	type ConfigScope,
@@ -21,7 +18,7 @@ import {
 	saveScopedPromptText,
 	scopeHasLocalOverrides,
 	type ThinkingLevel,
-} from "./config";
+} from './config';
 
 export interface RuntimeStatus {
 	available: boolean;
@@ -41,10 +38,7 @@ export interface LiveCompactionState {
 }
 
 export interface LiveCompactionController {
-	loadState(
-		ctx: ExtensionContext,
-		scope: ConfigScope,
-	): Promise<LiveCompactionState>;
+	loadState(ctx: ExtensionContext, scope: ConfigScope): Promise<LiveCompactionState>;
 	setConfig(
 		scope: ConfigScope,
 		next: LiveCompactionConfig,
@@ -56,22 +50,14 @@ export interface LiveCompactionController {
 		preset: PresetConfig,
 		ctx: ExtensionCommandContext,
 	): Promise<void>;
-	deletePreset(
-		scope: ConfigScope,
-		name: string,
-		ctx: ExtensionCommandContext,
-	): Promise<void>;
+	deletePreset(scope: ConfigScope, name: string, ctx: ExtensionCommandContext): Promise<void>;
 	savePrompt(
 		scope: ConfigScope,
 		kind: PromptKind,
 		text: string,
 		ctx: ExtensionCommandContext,
 	): Promise<void>;
-	resetPrompt(
-		scope: ConfigScope,
-		kind: PromptKind,
-		ctx: ExtensionCommandContext,
-	): Promise<void>;
+	resetPrompt(scope: ConfigScope, kind: PromptKind, ctx: ExtensionCommandContext): Promise<void>;
 	resetScope(scope: ConfigScope, ctx: ExtensionCommandContext): Promise<void>;
 	refreshRuntimeStatus(ctx: ExtensionContext): Promise<RuntimeStatus>;
 	getPaths(ctx: ExtensionContext): LiveCompactionPaths;
@@ -79,7 +65,7 @@ export interface LiveCompactionController {
 	getUsageText(): string;
 }
 
-const USAGE_TEXT = "Usage: /live-compaction [show|verify|path|reset|help]";
+const USAGE_TEXT = 'Usage: /live-compaction [show|verify|path|reset|help]';
 
 function createDefaultRuntimeStatus(): RuntimeStatus {
 	return {
@@ -88,9 +74,7 @@ function createDefaultRuntimeStatus(): RuntimeStatus {
 	};
 }
 
-function cloneConfig(
-	config: LiveCompactionConfig,
-): LiveCompactionConfig {
+function cloneConfig(config: LiveCompactionConfig): LiveCompactionConfig {
 	return {
 		includeFilesTouched: {
 			inCompactionSummary: config.includeFilesTouched.inCompactionSummary,
@@ -99,23 +83,17 @@ function cloneConfig(
 		defaultPreset: config.defaultPreset,
 		fallbackPreset: config.fallbackPreset,
 		presets: Object.fromEntries(
-			Object.entries(config.presets).map(([name, preset]) => [
-				name,
-				{ ...preset },
-			]),
+			Object.entries(config.presets).map(([name, preset]) => [name, { ...preset }]),
 		),
 		defaultPanelScope: config.defaultPanelScope,
 		inheritSessionModel: config.inheritSessionModel,
 	};
 }
 
-function describePromptSource(
-	kind: PromptKind,
-	prompt: PromptResolution,
-): string {
-	if (kind === "compaction") {
-		if (prompt.source === "default") {
-			return "compactionPrompt=default";
+function describePromptSource(kind: PromptKind, prompt: PromptResolution): string {
+	if (kind === 'compaction') {
+		if (prompt.source === 'default') {
+			return 'compactionPrompt=default';
 		}
 
 		if (prompt.isBlankOverride) {
@@ -125,8 +103,8 @@ function describePromptSource(
 		return `compactionPrompt=${prompt.source}:custom`;
 	}
 
-	if (prompt.source === "default") {
-		return "branchPrompt=default";
+	if (prompt.source === 'default') {
+		return 'branchPrompt=default';
 	}
 
 	if (prompt.isBlankOverride) {
@@ -144,7 +122,7 @@ function validateConfigAgainstModels(
 	const models = ctx.modelRegistry.getAll();
 
 	for (const [name, preset] of Object.entries(config.presets)) {
-		const separatorIndex = preset.model.indexOf("/");
+		const separatorIndex = preset.model.indexOf('/');
 		if (separatorIndex <= 0 || separatorIndex === preset.model.length - 1) {
 			issues.push(`Preset '${name}' uses invalid model '${preset.model}'.`);
 			continue;
@@ -153,19 +131,14 @@ function validateConfigAgainstModels(
 		const provider = preset.model.slice(0, separatorIndex);
 		const modelId = preset.model.slice(separatorIndex + 1);
 		const model = models.find(
-			(candidate) =>
-				candidate.provider === provider && candidate.id === modelId,
+			(candidate) => candidate.provider === provider && candidate.id === modelId,
 		);
 		if (!model) {
 			issues.push(`Preset '${name}' model ${preset.model} is not registered.`);
 			continue;
 		}
 
-		if (
-			preset.thinkingLevel &&
-			preset.thinkingLevel !== "off" &&
-			!model.reasoning
-		) {
+		if (preset.thinkingLevel && preset.thinkingLevel !== 'off' && !model.reasoning) {
 			issues.push(
 				`Preset '${name}' requires reasoning level '${preset.thinkingLevel}' but ${preset.model} does not support reasoning.`,
 			);
@@ -175,18 +148,16 @@ function validateConfigAgainstModels(
 	return issues;
 }
 
-function getEffectiveScope(
-	state: LiveCompactionState,
-): ConfigScope | "default" {
-	if (state.scope === "project" || !state.projectScopeAvailable) {
+function getEffectiveScope(state: LiveCompactionState): ConfigScope | 'default' {
+	if (state.scope === 'project' || !state.projectScopeAvailable) {
 		return state.scope;
 	}
 
 	if (state.projectScopeHasOverrides) {
-		return "project";
+		return 'project';
 	}
 
-	return "global";
+	return 'global';
 }
 
 export function createLiveCompactionController(): LiveCompactionController {
@@ -198,22 +169,15 @@ export function createLiveCompactionController(): LiveCompactionController {
 	): Promise<LiveCompactionState> {
 		const paths = resolveLiveCompactionPaths(ctx.cwd);
 		const config = await loadEditableScopedConfig(scope, ctx.cwd);
-		const [compactionPrompt, branchSummaryPrompt, projectScopeHasOverrides] =
-			await Promise.all([
-				resolveEffectivePrompt(
-					"compaction",
-					scope === "project" ? ctx.cwd : undefined,
-					undefined,
-				),
-				resolveEffectivePrompt(
-					"branch-summary",
-					scope === "project" ? ctx.cwd : undefined,
-					undefined,
-				),
-				paths.project
-					? scopeHasLocalOverrides("project", ctx.cwd)
-					: Promise.resolve(false),
-			]);
+		const [compactionPrompt, branchSummaryPrompt, projectScopeHasOverrides] = await Promise.all([
+			resolveEffectivePrompt('compaction', scope === 'project' ? ctx.cwd : undefined, undefined),
+			resolveEffectivePrompt(
+				'branch-summary',
+				scope === 'project' ? ctx.cwd : undefined,
+				undefined,
+			),
+			paths.project ? scopeHasLocalOverrides('project', ctx.cwd) : Promise.resolve(false),
+		]);
 
 		return {
 			scope,
@@ -237,14 +201,12 @@ export function createLiveCompactionController(): LiveCompactionController {
 				await saveScopedConfig(scope, next, ctx.cwd);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(message, "error");
+				ctx.ui.notify(message, 'error');
 			}
 		},
 
 		async upsertPreset(scope, name, preset, ctx) {
-			const config = cloneConfig(
-				await loadEditableScopedConfig(scope, ctx.cwd),
-			);
+			const config = cloneConfig(await loadEditableScopedConfig(scope, ctx.cwd));
 			config.presets[name] = preset;
 			if (
 				config.defaultPreset !== CURRENT_PRESET_SENTINEL &&
@@ -256,9 +218,7 @@ export function createLiveCompactionController(): LiveCompactionController {
 		},
 
 		async deletePreset(scope, name, ctx) {
-			const config = cloneConfig(
-				await loadEditableScopedConfig(scope, ctx.cwd),
-			);
+			const config = cloneConfig(await loadEditableScopedConfig(scope, ctx.cwd));
 			delete config.presets[name];
 			if (config.defaultPreset === name) {
 				config.defaultPreset = CURRENT_PRESET_SENTINEL;
@@ -271,7 +231,7 @@ export function createLiveCompactionController(): LiveCompactionController {
 				await saveScopedPromptText(kind, scope, text, ctx.cwd);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(message, "error");
+				ctx.ui.notify(message, 'error');
 			}
 		},
 
@@ -280,7 +240,7 @@ export function createLiveCompactionController(): LiveCompactionController {
 				await deleteScopedPrompt(kind, scope, ctx.cwd);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(message, "error");
+				ctx.ui.notify(message, 'error');
 			}
 		},
 
@@ -289,7 +249,7 @@ export function createLiveCompactionController(): LiveCompactionController {
 				await resetLiveCompactionScope(scope, ctx.cwd);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(message, "error");
+				ctx.ui.notify(message, 'error');
 			}
 		},
 
@@ -312,18 +272,18 @@ export function createLiveCompactionController(): LiveCompactionController {
 			const presetNames = Object.keys(state.config.presets);
 			const effectiveScope = getEffectiveScope(state);
 			const runtimePart = state.runtimeStatus.available
-				? "runtime=ok"
+				? 'runtime=ok'
 				: `runtime=issues:${state.runtimeStatus.issues.length}`;
 			return [
 				`scope=${state.scope}`,
 				`effective=${effectiveScope}`,
-				`filesTouched=compaction:${state.config.includeFilesTouched.inCompactionSummary ? "on" : "off"},branch:${state.config.includeFilesTouched.inBranchSummary ? "on" : "off"}`,
+				`filesTouched=compaction:${state.config.includeFilesTouched.inCompactionSummary ? 'on' : 'off'},branch:${state.config.includeFilesTouched.inBranchSummary ? 'on' : 'off'}`,
 				`defaultPreset=${state.config.defaultPreset}`,
-				`presets=${presetNames.length === 0 ? "none" : presetNames.join(",")}`,
-				describePromptSource("compaction", state.compactionPrompt),
-				describePromptSource("branch-summary", state.branchSummaryPrompt),
+				`presets=${presetNames.length === 0 ? 'none' : presetNames.join(',')}`,
+				describePromptSource('compaction', state.compactionPrompt),
+				describePromptSource('branch-summary', state.branchSummaryPrompt),
 				runtimePart,
-			].join(" | ");
+			].join(' | ');
 		},
 
 		getUsageText() {
@@ -333,9 +293,7 @@ export function createLiveCompactionController(): LiveCompactionController {
 }
 
 export function getPresetNames(config: LiveCompactionConfig): string[] {
-	return Object.keys(config.presets).sort((left, right) =>
-		left.localeCompare(right),
-	);
+	return Object.keys(config.presets).sort((left, right) => left.localeCompare(right));
 }
 
 export function buildPresetChoices(config: LiveCompactionConfig): string[] {
@@ -343,11 +301,9 @@ export function buildPresetChoices(config: LiveCompactionConfig): string[] {
 }
 
 export function formatThinkingLevel(value?: ThinkingLevel): string {
-	return value ?? "unset";
+	return value ?? 'unset';
 }
 
-export function parseThinkingLevelSelection(
-	value: string,
-): ThinkingLevel | undefined {
-	return value === "unset" ? undefined : (value as ThinkingLevel);
+export function parseThinkingLevelSelection(value: string): ThinkingLevel | undefined {
+	return value === 'unset' ? undefined : (value as ThinkingLevel);
 }

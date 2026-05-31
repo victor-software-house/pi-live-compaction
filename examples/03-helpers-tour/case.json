@@ -1,12 +1,13 @@
 {
-  "description": "Tour of every shipped filter/tag plus key Liquid built-ins. Doubles as helper docs.",
-  "discarded": [
-    { "role": "user", "text": "Long opening request that goes well past the truncate budget intentionally so we can verify the helper truncates with an ellipsis suffix at the configured boundary correctly." },
-    { "role": "assistant", "text": "Acknowledged. Working on it." },
-    { "role": "user", "text": "Quick follow-up." },
-    { "role": "assistant", "text": "Done." }
-  ],
-  "kept_tail": [
-    { "role": "user", "text": "Final ask: ship it." }
-  ]
+	"description": "Tour of every shipped filter/tag plus key Liquid built-ins. Doubles as helper docs.",
+	"discarded": [
+		{
+			"role": "user",
+			"text": "Long opening request that goes well past the truncate budget intentionally so we can verify the helper truncates with an ellipsis suffix at the configured boundary correctly."
+		},
+		{ "role": "assistant", "text": "Acknowledged. Working on it." },
+		{ "role": "user", "text": "Quick follow-up." },
+		{ "role": "assistant", "text": "Done." }
+	],
+	"kept_tail": [{ "role": "user", "text": "Final ask: ship it." }]
 }

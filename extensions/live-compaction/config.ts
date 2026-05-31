@@ -1,17 +1,11 @@
-import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { getAgentDir } from "@earendil-works/pi-coding-agent";
-import dedent from "dedent";
+import { getAgentDir } from '@earendil-works/pi-coding-agent';
+import dedent from 'dedent';
 
-export type ThinkingLevel =
-	| "off"
-	| "minimal"
-	| "low"
-	| "medium"
-	| "high"
-	| "xhigh";
+export type ThinkingLevel = 'off' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh';
 
 export interface IncludeFilesTouchedSettings {
 	inCompactionSummary: boolean;
@@ -46,40 +40,37 @@ export interface LiveCompactionConfig {
 	inheritSessionModel: boolean;
 }
 
-export type ConfigScope = "global" | "project";
+export type ConfigScope = 'global' | 'project';
 /**
  * Panel-scope preference. Same shape as ConfigScope today, kept as a
  * separate alias so adding new modes later (e.g. `"last-used"`) does not
  * require touching every ConfigScope consumer.
  */
 export type PanelScope = ConfigScope;
-export type PromptKind = "compaction" | "branch-summary";
+export type PromptKind = 'compaction' | 'branch-summary';
 
 type JsonObject = Record<string, unknown>;
 
 const EXTENSION_DIR = path.dirname(fileURLToPath(import.meta.url));
-const CONFIG_FILE_NAME = "config.json";
-const COMPACTION_PROMPT_FILE_NAME = "compaction-prompt.md";
-const BRANCH_SUMMARY_PROMPT_FILE_NAME = "branch-summary-prompt.md";
+const CONFIG_FILE_NAME = 'config.json';
+const COMPACTION_PROMPT_FILE_NAME = 'compaction-prompt.md';
+const BRANCH_SUMMARY_PROMPT_FILE_NAME = 'branch-summary-prompt.md';
 
-export const CURRENT_PRESET_SENTINEL = "current";
+export const CURRENT_PRESET_SENTINEL = 'current';
 
 const DEFAULT_INCLUDE_FILES_TOUCHED_SETTINGS: IncludeFilesTouchedSettings = {
 	inCompactionSummary: true,
 	inBranchSummary: true,
 };
 
-export const PANEL_SCOPE_VALUES: readonly PanelScope[] = [
-	"global",
-	"project",
-];
+export const PANEL_SCOPE_VALUES: readonly PanelScope[] = ['global', 'project'];
 
 export const DEFAULT_CONFIG: LiveCompactionConfig = {
 	includeFilesTouched: DEFAULT_INCLUDE_FILES_TOUCHED_SETTINGS,
 	defaultPreset: CURRENT_PRESET_SENTINEL,
 	fallbackPreset: CURRENT_PRESET_SENTINEL,
 	presets: {},
-	defaultPanelScope: "global",
+	defaultPanelScope: 'global',
 	inheritSessionModel: false,
 };
 
@@ -87,7 +78,7 @@ function parsePanelScope(value: unknown): PanelScope {
 	if (value === undefined) {
 		return DEFAULT_CONFIG.defaultPanelScope;
 	}
-	if (typeof value !== "string") {
+	if (typeof value !== 'string') {
 		throw new Error(
 			"Invalid live-compaction config: defaultPanelScope must be one of 'global' or 'project'",
 		);
@@ -95,10 +86,10 @@ function parsePanelScope(value: unknown): PanelScope {
 	const normalized = value.trim().toLowerCase();
 	// Legacy "auto" maps onto "project" since the runtime semantics already
 	// fall back to global when no project session is active.
-	if (normalized === "auto") {
-		return "project";
+	if (normalized === 'auto') {
+		return 'project';
 	}
-	if (normalized === "global" || normalized === "project") {
+	if (normalized === 'global' || normalized === 'project') {
 		return normalized;
 	}
 	throw new Error(
@@ -305,14 +296,14 @@ export const DEFAULT_BRANCH_SUMMARY_TEMPLATE_BODY = dedent`
 
 export interface LiveCompactionPaths {
 	global: {
-		scope: "global";
+		scope: 'global';
 		rootDir: string;
 		configPath: string;
 		compactionPromptPath: string;
 		branchSummaryPromptPath: string;
 	};
 	project?: {
-		scope: "project";
+		scope: 'project';
 		rootDir: string;
 		configPath: string;
 		compactionPromptPath: string;
@@ -321,31 +312,29 @@ export interface LiveCompactionPaths {
 }
 
 export interface PromptResolution {
-	source: ConfigScope | "default";
+	source: ConfigScope | 'default';
 	text?: string;
 	isOverride: boolean;
 	isBlankOverride: boolean;
 }
 
 function isObject(value: unknown): value is JsonObject {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
+	return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-export function normalizeThinkingLevel(
-	value: unknown,
-): ThinkingLevel | undefined {
-	if (typeof value !== "string") {
+export function normalizeThinkingLevel(value: unknown): ThinkingLevel | undefined {
+	if (typeof value !== 'string') {
 		return undefined;
 	}
 
 	const normalized = value.trim().toLowerCase();
 	if (
-		normalized === "off" ||
-		normalized === "minimal" ||
-		normalized === "low" ||
-		normalized === "medium" ||
-		normalized === "high" ||
-		normalized === "xhigh"
+		normalized === 'off' ||
+		normalized === 'minimal' ||
+		normalized === 'low' ||
+		normalized === 'medium' ||
+		normalized === 'high' ||
+		normalized === 'xhigh'
 	) {
 		return normalized;
 	}
@@ -359,23 +348,19 @@ export function normalizeOptionalText(value?: string): string | undefined {
 }
 
 function expectBoolean(value: unknown, key: string): boolean {
-	if (typeof value !== "boolean") {
-		throw new Error(
-			`Invalid live-compaction config: ${key} must be a boolean`,
-		);
+	if (typeof value !== 'boolean') {
+		throw new Error(`Invalid live-compaction config: ${key} must be a boolean`);
 	}
 
 	return value;
 }
 
-function parseIncludeFilesTouchedSettings(
-	value: unknown,
-): IncludeFilesTouchedSettings {
+function parseIncludeFilesTouchedSettings(value: unknown): IncludeFilesTouchedSettings {
 	if (value === undefined) {
 		return structuredClone(DEFAULT_INCLUDE_FILES_TOUCHED_SETTINGS);
 	}
 
-	if (typeof value === "boolean") {
+	if (typeof value === 'boolean') {
 		return {
 			inCompactionSummary: value,
 			inBranchSummary: value,
@@ -384,80 +369,65 @@ function parseIncludeFilesTouchedSettings(
 
 	if (!isObject(value)) {
 		throw new Error(
-			"Invalid live-compaction config: includeFilesTouched must be a boolean or an object with inCompactionSummary and inBranchSummary",
+			'Invalid live-compaction config: includeFilesTouched must be a boolean or an object with inCompactionSummary and inBranchSummary',
 		);
 	}
 
 	return {
 		inCompactionSummary: expectBoolean(
 			value.inCompactionSummary,
-			"includeFilesTouched.inCompactionSummary",
+			'includeFilesTouched.inCompactionSummary',
 		),
-		inBranchSummary: expectBoolean(
-			value.inBranchSummary,
-			"includeFilesTouched.inBranchSummary",
-		),
+		inBranchSummary: expectBoolean(value.inBranchSummary, 'includeFilesTouched.inBranchSummary'),
 	};
 }
 
 export function parseConfig(value: unknown): LiveCompactionConfig {
 	if (!isObject(value)) {
-		throw new Error(
-			"Invalid live-compaction config: top-level value must be an object",
-		);
+		throw new Error('Invalid live-compaction config: top-level value must be an object');
 	}
 
-	const includeFilesTouched = parseIncludeFilesTouchedSettings(
-		value.includeFilesTouched,
-	);
+	const includeFilesTouched = parseIncludeFilesTouchedSettings(value.includeFilesTouched);
 
 	const defaultPreset =
 		value.defaultPreset === undefined
 			? DEFAULT_CONFIG.defaultPreset
-			: typeof value.defaultPreset === "string" && value.defaultPreset.trim()
+			: typeof value.defaultPreset === 'string' && value.defaultPreset.trim()
 				? value.defaultPreset.trim()
 				: (() => {
 						throw new Error(
-							"Invalid live-compaction config: defaultPreset must be a non-empty string",
+							'Invalid live-compaction config: defaultPreset must be a non-empty string',
 						);
 					})();
 
 	const fallbackPreset =
 		value.fallbackPreset === undefined
 			? DEFAULT_CONFIG.fallbackPreset
-			: typeof value.fallbackPreset === "string" && value.fallbackPreset.trim()
+			: typeof value.fallbackPreset === 'string' && value.fallbackPreset.trim()
 				? value.fallbackPreset.trim()
 				: (() => {
 						throw new Error(
-							"Invalid live-compaction config: fallbackPreset must be a non-empty string when provided",
+							'Invalid live-compaction config: fallbackPreset must be a non-empty string when provided',
 						);
 					})();
 
 	const presetsValue = value.presets === undefined ? {} : value.presets;
 	if (!isObject(presetsValue)) {
-		throw new Error(
-			"Invalid live-compaction config: presets must be an object",
-		);
+		throw new Error('Invalid live-compaction config: presets must be an object');
 	}
 
 	const presets: Record<string, PresetConfig> = {};
 	for (const [presetName, presetValue] of Object.entries(presetsValue)) {
 		if (!presetName.trim()) {
-			throw new Error(
-				"Invalid live-compaction config: preset names must be non-empty strings",
-			);
+			throw new Error('Invalid live-compaction config: preset names must be non-empty strings');
 		}
 
 		if (!isObject(presetValue)) {
-			throw new Error(
-				`Invalid live-compaction config: preset '${presetName}' must be an object`,
-			);
+			throw new Error(`Invalid live-compaction config: preset '${presetName}' must be an object`);
 		}
 
-		if (typeof presetValue.model !== "string" || !presetValue.model.trim()) {
-			throw new Error(
-				`Invalid live-compaction config: preset '${presetName}' must define model`,
-			);
+		if (typeof presetValue.model !== 'string' || !presetValue.model.trim()) {
+			throw new Error(`Invalid live-compaction config: preset '${presetName}' must define model`);
 		}
 
 		const thinkingLevel =
@@ -497,7 +467,7 @@ export function parseConfig(value: unknown): LiveCompactionConfig {
 	const inheritSessionModel =
 		value.inheritSessionModel === undefined
 			? DEFAULT_CONFIG.inheritSessionModel
-			: expectBoolean(value.inheritSessionModel, "inheritSessionModel");
+			: expectBoolean(value.inheritSessionModel, 'inheritSessionModel');
 
 	return {
 		includeFilesTouched,
@@ -509,39 +479,33 @@ export function parseConfig(value: unknown): LiveCompactionConfig {
 	};
 }
 
-export async function loadConfig(
-	extensionDir = EXTENSION_DIR,
-): Promise<LiveCompactionConfig> {
+export async function loadConfig(extensionDir = EXTENSION_DIR): Promise<LiveCompactionConfig> {
 	const configPath = path.join(extensionDir, CONFIG_FILE_NAME);
 
 	try {
-		const raw = await readFile(configPath, "utf8");
+		const raw = await readFile(configPath, 'utf8');
 		return parseConfig(JSON.parse(raw) as unknown);
 	} catch (error) {
 		const code = (error as { code?: string }).code;
-		if (code === "ENOENT") {
+		if (code === 'ENOENT') {
 			return structuredClone(DEFAULT_CONFIG);
 		}
 
 		const message = error instanceof Error ? error.message : String(error);
-		throw new Error(
-			`Failed to load live-compaction config from ${configPath}: ${message}`,
-		);
+		throw new Error(`Failed to load live-compaction config from ${configPath}: ${message}`);
 	}
 }
 
-export async function loadCompactionPromptContract(
-	extensionDir = EXTENSION_DIR,
-): Promise<string> {
+export async function loadCompactionPromptContract(extensionDir = EXTENSION_DIR): Promise<string> {
 	const promptPath = path.join(extensionDir, COMPACTION_PROMPT_FILE_NAME);
 
 	try {
-		const raw = await readFile(promptPath, "utf8");
+		const raw = await readFile(promptPath, 'utf8');
 		const trimmed = raw.trim();
 		return trimmed || DEFAULT_COMPACTION_PROMPT_CONTRACT;
 	} catch (error) {
 		const code = (error as { code?: string }).code;
-		if (code === "ENOENT") {
+		if (code === 'ENOENT') {
 			return DEFAULT_COMPACTION_PROMPT_CONTRACT;
 		}
 
@@ -558,11 +522,11 @@ export async function loadBranchSummaryPromptContract(
 	const promptPath = path.join(extensionDir, BRANCH_SUMMARY_PROMPT_FILE_NAME);
 
 	try {
-		const raw = await readFile(promptPath, "utf8");
+		const raw = await readFile(promptPath, 'utf8');
 		return normalizeOptionalText(raw);
 	} catch (error) {
 		const code = (error as { code?: string }).code;
-		if (code === "ENOENT") {
+		if (code === 'ENOENT') {
 			return undefined;
 		}
 
@@ -577,36 +541,25 @@ export function resolveLiveCompactionPaths(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): LiveCompactionPaths {
-	const globalRoot = path.join(agentDir, "extensions", "live-compaction");
-	const projectRoot = cwd
-		? path.join(cwd, ".pi", "extensions", "live-compaction")
-		: undefined;
+	const globalRoot = path.join(agentDir, 'extensions', 'live-compaction');
+	const projectRoot = cwd ? path.join(cwd, '.pi', 'extensions', 'live-compaction') : undefined;
 
 	return {
 		global: {
-			scope: "global",
+			scope: 'global',
 			rootDir: globalRoot,
 			configPath: path.join(globalRoot, CONFIG_FILE_NAME),
 			compactionPromptPath: path.join(globalRoot, COMPACTION_PROMPT_FILE_NAME),
-			branchSummaryPromptPath: path.join(
-				globalRoot,
-				BRANCH_SUMMARY_PROMPT_FILE_NAME,
-			),
+			branchSummaryPromptPath: path.join(globalRoot, BRANCH_SUMMARY_PROMPT_FILE_NAME),
 		},
 		...(projectRoot
 			? {
 					project: {
-						scope: "project" as const,
+						scope: 'project' as const,
 						rootDir: projectRoot,
 						configPath: path.join(projectRoot, CONFIG_FILE_NAME),
-						compactionPromptPath: path.join(
-							projectRoot,
-							COMPACTION_PROMPT_FILE_NAME,
-						),
-						branchSummaryPromptPath: path.join(
-							projectRoot,
-							BRANCH_SUMMARY_PROMPT_FILE_NAME,
-						),
+						compactionPromptPath: path.join(projectRoot, COMPACTION_PROMPT_FILE_NAME),
+						branchSummaryPromptPath: path.join(projectRoot, BRANCH_SUMMARY_PROMPT_FILE_NAME),
 					},
 				}
 			: {}),
@@ -614,9 +567,9 @@ export function resolveLiveCompactionPaths(
 }
 
 function getScopedPaths(paths: LiveCompactionPaths, scope: ConfigScope) {
-	if (scope === "project") {
+	if (scope === 'project') {
 		if (!paths.project) {
-			throw new Error("Project scope requires an active working directory");
+			throw new Error('Project scope requires an active working directory');
 		}
 		return paths.project;
 	}
@@ -624,17 +577,15 @@ function getScopedPaths(paths: LiveCompactionPaths, scope: ConfigScope) {
 	return paths.global;
 }
 
-async function readTextFileIfExists(
-	filePath: string,
-): Promise<{ exists: boolean; text?: string }> {
+async function readTextFileIfExists(filePath: string): Promise<{ exists: boolean; text?: string }> {
 	try {
 		return {
 			exists: true,
-			text: await readFile(filePath, "utf8"),
+			text: await readFile(filePath, 'utf8'),
 		};
 	} catch (error) {
 		const code = (error as { code?: string }).code;
-		if (code === "ENOENT") {
+		if (code === 'ENOENT') {
 			return { exists: false };
 		}
 
@@ -647,7 +598,7 @@ async function writeTextFile(filePath: string, text: string): Promise<void> {
 
 	try {
 		await mkdir(path.dirname(filePath), { recursive: true });
-		await writeFile(tmpPath, text, "utf8");
+		await writeFile(tmpPath, text, 'utf8');
 		await rename(tmpPath, filePath);
 	} catch (error) {
 		await rm(tmpPath, { force: true }).catch(() => undefined);
@@ -660,17 +611,14 @@ export async function loadScopedConfig(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<LiveCompactionConfig> {
-	const scopedPaths = getScopedPaths(
-		resolveLiveCompactionPaths(cwd, agentDir),
-		scope,
-	);
+	const scopedPaths = getScopedPaths(resolveLiveCompactionPaths(cwd, agentDir), scope);
 
 	try {
-		const raw = await readFile(scopedPaths.configPath, "utf8");
+		const raw = await readFile(scopedPaths.configPath, 'utf8');
 		return parseConfig(JSON.parse(raw) as unknown);
 	} catch (error) {
 		const code = (error as { code?: string }).code;
-		if (code === "ENOENT") {
+		if (code === 'ENOENT') {
 			return structuredClone(DEFAULT_CONFIG);
 		}
 
@@ -693,7 +641,7 @@ export async function loadEditableScopedConfig(
 		return loadScopedConfig(scope, cwd, agentDir);
 	}
 
-	if (scope === "project") {
+	if (scope === 'project') {
 		return loadEffectiveConfig(cwd, agentDir);
 	}
 
@@ -706,15 +654,9 @@ export async function saveScopedConfig(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<string> {
-	const scopedPaths = getScopedPaths(
-		resolveLiveCompactionPaths(cwd, agentDir),
-		scope,
-	);
+	const scopedPaths = getScopedPaths(resolveLiveCompactionPaths(cwd, agentDir), scope);
 	const normalized = parseConfig(config);
-	await writeTextFile(
-		scopedPaths.configPath,
-		`${JSON.stringify(normalized, null, "\t")}\n`,
-	);
+	await writeTextFile(scopedPaths.configPath, `${JSON.stringify(normalized, null, '\t')}\n`);
 	return scopedPaths.configPath;
 }
 
@@ -727,10 +669,10 @@ export async function loadEffectiveConfig(
 		? await readTextFileIfExists(paths.project.configPath)
 		: { exists: false };
 	if (projectConfig.exists) {
-		return loadScopedConfig("project", cwd, agentDir);
+		return loadScopedConfig('project', cwd, agentDir);
 	}
 
-	return loadScopedConfig("global", cwd, agentDir);
+	return loadScopedConfig('global', cwd, agentDir);
 }
 
 export async function loadScopedPromptText(
@@ -739,14 +681,9 @@ export async function loadScopedPromptText(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<{ exists: boolean; text?: string }> {
-	const scopedPaths = getScopedPaths(
-		resolveLiveCompactionPaths(cwd, agentDir),
-		scope,
-	);
+	const scopedPaths = getScopedPaths(resolveLiveCompactionPaths(cwd, agentDir), scope);
 	const promptPath =
-		kind === "compaction"
-			? scopedPaths.compactionPromptPath
-			: scopedPaths.branchSummaryPromptPath;
+		kind === 'compaction' ? scopedPaths.compactionPromptPath : scopedPaths.branchSummaryPromptPath;
 
 	return readTextFileIfExists(promptPath);
 }
@@ -757,19 +694,15 @@ export async function resolveEffectivePrompt(
 	agentDir = getAgentDir(),
 ): Promise<PromptResolution> {
 	const paths = resolveLiveCompactionPaths(cwd, agentDir);
-	const promptPathKey =
-		kind === "compaction" ? "compactionPromptPath" : "branchSummaryPromptPath";
-	const defaultText =
-		kind === "compaction" ? DEFAULT_COMPACTION_PROMPT_CONTRACT : undefined;
+	const promptPathKey = kind === 'compaction' ? 'compactionPromptPath' : 'branchSummaryPromptPath';
+	const defaultText = kind === 'compaction' ? DEFAULT_COMPACTION_PROMPT_CONTRACT : undefined;
 
 	if (paths.project) {
-		const projectPrompt = await readTextFileIfExists(
-			paths.project[promptPathKey],
-		);
+		const projectPrompt = await readTextFileIfExists(paths.project[promptPathKey]);
 		if (projectPrompt.exists) {
 			const trimmed = normalizeOptionalText(projectPrompt.text);
 			return {
-				source: "project",
+				source: 'project',
 				text: trimmed ?? defaultText,
 				isOverride: Boolean(trimmed),
 				isBlankOverride: !trimmed,
@@ -781,7 +714,7 @@ export async function resolveEffectivePrompt(
 	if (globalPrompt.exists) {
 		const trimmed = normalizeOptionalText(globalPrompt.text);
 		return {
-			source: "global",
+			source: 'global',
 			text: trimmed ?? defaultText,
 			isOverride: Boolean(trimmed),
 			isBlankOverride: !trimmed,
@@ -789,7 +722,7 @@ export async function resolveEffectivePrompt(
 	}
 
 	return {
-		source: "default",
+		source: 'default',
 		text: defaultText,
 		isOverride: false,
 		isBlankOverride: false,
@@ -800,7 +733,7 @@ export async function loadEffectiveCompactionPromptContract(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<string> {
-	const resolution = await resolveEffectivePrompt("compaction", cwd, agentDir);
+	const resolution = await resolveEffectivePrompt('compaction', cwd, agentDir);
 	return resolution.text ?? DEFAULT_COMPACTION_PROMPT_CONTRACT;
 }
 
@@ -808,11 +741,7 @@ export async function loadEffectiveBranchSummaryPromptContract(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<string | undefined> {
-	const resolution = await resolveEffectivePrompt(
-		"branch-summary",
-		cwd,
-		agentDir,
-	);
+	const resolution = await resolveEffectivePrompt('branch-summary', cwd, agentDir);
 	return resolution.text;
 }
 
@@ -823,14 +752,9 @@ export async function saveScopedPromptText(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<string> {
-	const scopedPaths = getScopedPaths(
-		resolveLiveCompactionPaths(cwd, agentDir),
-		scope,
-	);
+	const scopedPaths = getScopedPaths(resolveLiveCompactionPaths(cwd, agentDir), scope);
 	const promptPath =
-		kind === "compaction"
-			? scopedPaths.compactionPromptPath
-			: scopedPaths.branchSummaryPromptPath;
+		kind === 'compaction' ? scopedPaths.compactionPromptPath : scopedPaths.branchSummaryPromptPath;
 	const normalized = `${text.trimEnd()}\n`;
 	await writeTextFile(promptPath, normalized);
 	return promptPath;
@@ -842,14 +766,9 @@ export async function deleteScopedPrompt(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<string> {
-	const scopedPaths = getScopedPaths(
-		resolveLiveCompactionPaths(cwd, agentDir),
-		scope,
-	);
+	const scopedPaths = getScopedPaths(resolveLiveCompactionPaths(cwd, agentDir), scope);
 	const promptPath =
-		kind === "compaction"
-			? scopedPaths.compactionPromptPath
-			: scopedPaths.branchSummaryPromptPath;
+		kind === 'compaction' ? scopedPaths.compactionPromptPath : scopedPaths.branchSummaryPromptPath;
 	await rm(promptPath, { force: true });
 	return promptPath;
 }
@@ -859,19 +778,14 @@ export async function resetLiveCompactionScope(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<string[]> {
-	const scopedPaths = getScopedPaths(
-		resolveLiveCompactionPaths(cwd, agentDir),
-		scope,
-	);
+	const scopedPaths = getScopedPaths(resolveLiveCompactionPaths(cwd, agentDir), scope);
 	const removedPaths = [
 		scopedPaths.configPath,
 		scopedPaths.compactionPromptPath,
 		scopedPaths.branchSummaryPromptPath,
 	];
 
-	await Promise.all(
-		removedPaths.map((filePath) => rm(filePath, { force: true })),
-	);
+	await Promise.all(removedPaths.map((filePath) => rm(filePath, { force: true })));
 	return removedPaths;
 }
 
@@ -880,10 +794,7 @@ export async function scopeHasLocalOverrides(
 	cwd?: string | null,
 	agentDir = getAgentDir(),
 ): Promise<boolean> {
-	const scopedPaths = getScopedPaths(
-		resolveLiveCompactionPaths(cwd, agentDir),
-		scope,
-	);
+	const scopedPaths = getScopedPaths(resolveLiveCompactionPaths(cwd, agentDir), scope);
 	const checks = await Promise.all([
 		readTextFileIfExists(scopedPaths.configPath),
 		readTextFileIfExists(scopedPaths.compactionPromptPath),

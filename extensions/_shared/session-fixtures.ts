@@ -21,9 +21,9 @@
  *      that don't need a JSONL on disk.
  */
 
-import { readFile } from "node:fs/promises";
+import { readFile } from 'node:fs/promises';
 
-import type { Message } from "@earendil-works/pi-ai";
+import type { Message } from '@earendil-works/pi-ai';
 
 // ---------------------------------------------------------------------------
 // Types mirroring the relevant slice of pi's runtime
@@ -32,7 +32,7 @@ import type { Message } from "@earendil-works/pi-ai";
 /** Pi session JSONL entry, narrowed to the parts we use. */
 export interface SessionMessageEntry {
 	id: string;
-	type: "message";
+	type: 'message';
 	message: Message;
 	timestamp?: string;
 }
@@ -62,10 +62,8 @@ export interface SessionFixture {
 // JSONL loading
 // ---------------------------------------------------------------------------
 
-export async function loadSessionEntries(
-	jsonlPath: string,
-): Promise<SessionEntry[]> {
-	const raw = await readFile(jsonlPath, "utf8");
+export async function loadSessionEntries(jsonlPath: string): Promise<SessionEntry[]> {
+	const raw = await readFile(jsonlPath, 'utf8');
 	const entries: SessionEntry[] = [];
 	let lineNo = 0;
 	for (const line of raw.split(/\r?\n/)) {
@@ -118,15 +116,13 @@ export async function loadSessionFixtureFromJsonl(
 
 	const cutIndex = entries.findIndex((e) => e.id === cutId);
 	if (cutIndex < 0) {
-		throw new Error(
-			`Cut entry id ${cutId} not found in session ${jsonlPath}`,
-		);
+		throw new Error(`Cut entry id ${cutId} not found in session ${jsonlPath}`);
 	}
 
 	const discardedMessages: Message[] = [];
 	for (let i = 0; i < cutIndex; i++) {
 		const entry = entries[i];
-		if (entry.type === "message") {
+		if (entry.type === 'message') {
 			discardedMessages.push((entry as SessionMessageEntry).message);
 		}
 	}
@@ -145,10 +141,7 @@ function findDefaultCutId(entries: SessionEntry[]): string | undefined {
 	// the latest user ask plus whatever comes after it.
 	for (let i = entries.length - 1; i >= 0; i--) {
 		const entry = entries[i];
-		if (
-			entry.type === "message" &&
-			(entry as SessionMessageEntry).message.role === "user"
-		) {
+		if (entry.type === 'message' && (entry as SessionMessageEntry).message.role === 'user') {
 			return entry.id;
 		}
 	}
@@ -172,7 +165,7 @@ export function buildSessionFixture(input: BuildFixtureInput): SessionFixture {
 	for (const m of input.discarded) {
 		branchEntries.push({
 			id: `discarded-${i++}`,
-			type: "message",
+			type: 'message',
 			message: m,
 		} satisfies SessionMessageEntry);
 	}
@@ -181,7 +174,7 @@ export function buildSessionFixture(input: BuildFixtureInput): SessionFixture {
 	for (const m of input.keptTail) {
 		branchEntries.push({
 			id: `kept-${j++}`,
-			type: "message",
+			type: 'message',
 			message: m,
 		} satisfies SessionMessageEntry);
 	}
@@ -199,18 +192,14 @@ export function buildSessionFixture(input: BuildFixtureInput): SessionFixture {
 // way runLiveCompaction does.
 // ---------------------------------------------------------------------------
 
-export function collectKeptTailFromFixture(
-	fixture: SessionFixture,
-): Message[] {
+export function collectKeptTailFromFixture(fixture: SessionFixture): Message[] {
 	if (!fixture.firstKeptEntryId) return [];
-	const startIndex = fixture.branchEntries.findIndex(
-		(e) => e.id === fixture.firstKeptEntryId,
-	);
+	const startIndex = fixture.branchEntries.findIndex((e) => e.id === fixture.firstKeptEntryId);
 	if (startIndex < 0) return [];
 	const out: Message[] = [];
 	for (let i = startIndex; i < fixture.branchEntries.length; i++) {
 		const entry = fixture.branchEntries[i];
-		if (entry.type === "message") {
+		if (entry.type === 'message') {
 			out.push((entry as SessionMessageEntry).message);
 		}
 	}
@@ -218,8 +207,6 @@ export function collectKeptTailFromFixture(
 }
 
 /** Concatenated discarded messages in chronological order (head + prefix). */
-export function collectDiscardedFromFixture(
-	fixture: SessionFixture,
-): Message[] {
+export function collectDiscardedFromFixture(fixture: SessionFixture): Message[] {
 	return [...fixture.messagesToSummarize, ...fixture.turnPrefixMessages];
 }

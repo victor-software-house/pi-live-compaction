@@ -4,26 +4,23 @@ import type {
 	Context,
 	Model,
 	SimpleStreamOptions,
-} from "@earendil-works/pi-ai";
-import {
-	completeSimple,
-	streamSimple as streamSimpleDefault,
-} from "@earendil-works/pi-ai";
-import { convertToLlm } from "@earendil-works/pi-coding-agent";
+} from '@earendil-works/pi-ai';
+import { completeSimple, streamSimple as streamSimpleDefault } from '@earendil-works/pi-ai';
+import { convertToLlm } from '@earendil-works/pi-coding-agent';
 
-import { collectFilesTouched } from "../_shared/files-touched-core";
-import type { AppendEntry } from "./attempt-entry";
+import { collectFilesTouched } from '@shared/files-touched-core';
+import type { AppendEntry } from './attempt-entry';
 import {
 	loadEffectiveBranchSummaryPromptContract,
 	loadEffectiveCompactionPromptContract,
 	loadEffectiveConfig,
 	resolveLiveCompactionPaths,
 	type ThinkingLevel,
-} from "./config";
-import { loadCompactionTemplate } from "./template";
+} from './config';
+import { loadCompactionTemplate } from './template';
 
-export type NotifyLevel = "info" | "warning" | "error";
-export type ReasoningLevel = Exclude<ThinkingLevel, "off">;
+export type NotifyLevel = 'info' | 'warning' | 'error';
+export type ReasoningLevel = Exclude<ThinkingLevel, 'off'>;
 export type PreparedMessages = Parameters<typeof convertToLlm>[0];
 export type StreamSimple = (
 	model: Model<Api>,
@@ -56,9 +53,9 @@ export interface LiveCompactionDetails {
 }
 
 export interface PresetMatchResult {
-	kind: "matched" | "ambiguous" | "unmatched";
+	kind: 'matched' | 'ambiguous' | 'unmatched';
 	name?: string;
-	preset?: import("./config.ts").PresetConfig;
+	preset?: import('./config.ts').PresetConfig;
 }
 
 export type HookContext = {
@@ -68,11 +65,8 @@ export type HookContext = {
 		setStatus?(key: string, text: string | undefined): void;
 		setWidget?(
 			key: string,
-			content:
-				| string[]
-				| ((...args: unknown[]) => unknown)
-				| undefined,
-			options?: { placement?: "aboveEditor" | "belowEditor" },
+			content: string[] | ((...args: unknown[]) => unknown) | undefined,
+			options?: { placement?: 'aboveEditor' | 'belowEditor' },
 		): void;
 		setWorkingMessage?(message?: string): void;
 	};
@@ -83,8 +77,7 @@ export type HookContext = {
 		getApiKeyAndHeaders(
 			model: Model<Api>,
 		): Promise<
-			| { ok: true; apiKey?: string; headers?: Record<string, string> }
-			| { ok: false; error: string }
+			{ ok: true; apiKey?: string; headers?: Record<string, string> } | { ok: false; error: string }
 		>;
 	};
 };

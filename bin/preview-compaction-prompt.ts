@@ -16,29 +16,23 @@
  * exit code 1 on any template/fixture error so it composes with CI.
  */
 
-import { readFileSync } from "node:fs";
-import { dirname, isAbsolute, resolve } from "node:path";
-import process from "node:process";
+import { readFileSync } from 'node:fs';
+import { dirname, isAbsolute, resolve } from 'node:path';
+import process from 'node:process';
 
-import {
-	convertToLlm,
-	serializeConversation,
-} from "@earendil-works/pi-coding-agent";
+import { convertToLlm, serializeConversation } from '@earendil-works/pi-coding-agent';
 
 import {
 	collectFilesTouched,
 	type FilesTouchedEntry,
-} from "../extensions/_shared/files-touched-core";
+} from '@shared/files-touched-core';
 import {
 	collectDiscardedFromFixture,
 	collectKeptTailFromFixture,
 	loadSessionFixtureFromJsonl,
-} from "../extensions/_shared/session-fixtures";
-import { renderFilesTouchedManifestBlock } from "../extensions/_shared/files-touched-manifest";
-import {
-	buildRenderVars,
-	loadCompactionTemplate,
-} from "../extensions/live-compaction/template";
+} from '@shared/session-fixtures';
+import { renderFilesTouchedManifestBlock } from '@shared/files-touched-manifest';
+import { buildRenderVars, loadCompactionTemplate } from '@live-compaction/template';
 
 interface Args {
 	template: string;
@@ -60,26 +54,26 @@ function parseArgs(argv: string[]): Args {
 	for (let i = 0; i < argv.length; i++) {
 		const arg = argv[i];
 		switch (arg) {
-			case "--template":
+			case '--template':
 				template = argv[++i];
 				break;
-			case "--fixture":
+			case '--fixture':
 				fixture = argv[++i];
 				break;
-			case "--cut-at":
+			case '--cut-at':
 				cutAt = argv[++i];
 				break;
-			case "--previous-summary":
+			case '--previous-summary':
 				previousSummary = argv[++i];
 				break;
-			case "--focus":
+			case '--focus':
 				focus = argv[++i];
 				break;
-			case "--no-files-touched":
+			case '--no-files-touched':
 				includeFilesTouched = false;
 				break;
-			case "--help":
-			case "-h":
+			case '--help':
+			case '-h':
 				printHelp();
 				process.exit(0);
 				break;
@@ -90,7 +84,7 @@ function parseArgs(argv: string[]): Args {
 
 	if (!template || !fixture) {
 		printHelp();
-		throw new Error("--template and --fixture are required");
+		throw new Error('--template and --fixture are required');
 	}
 
 	return {
@@ -134,10 +128,10 @@ async function main(): Promise<void> {
 
 	const discardedText = discardedMessages.length
 		? serializeConversation(convertToLlm(discardedMessages))
-		: "";
+		: '';
 	const keptTailText = keptTailMessages.length
 		? serializeConversation(convertToLlm(keptTailMessages))
-		: "";
+		: '';
 
 	let filesTouchedBlock: string | undefined;
 	if (args.includeFilesTouched) {
@@ -166,7 +160,7 @@ async function main(): Promise<void> {
 	});
 
 	process.stdout.write(template.render(vars));
-	if (!process.stdout.write("\n")) {
+	if (!process.stdout.write('\n')) {
 		// drain
 	}
 }

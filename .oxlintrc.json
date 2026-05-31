@@ -1,0 +1,49 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"categories": {
+		"correctness": "error",
+		"perf": "error",
+		"restriction": "off",
+		"style": "warn",
+		"suspicious": "error",
+		"pedantic": "off",
+		"nursery": "off"
+	},
+	"plugins": ["typescript", "unicorn", "import", "promise", "node", "oxc", "import-alias"],
+	"rules": {
+		"no-console": "warn",
+		"import/no-default-export": "error",
+		"import/no-cycle": "error",
+		"import-alias/no-relative-paths": "error",
+		"typescript/no-explicit-any": "error",
+		"typescript/no-non-null-assertion": "error",
+		"typescript/consistent-type-imports": "error",
+		"typescript/no-unused-vars": "error",
+		"unicorn/prefer-node-protocol": "error",
+		"unicorn/no-null": "off",
+		"promise/always-return": "error",
+		"promise/no-return-wrap": "error"
+	},
+	"settings": {
+		"import-alias/aliases": {
+			"@live-compaction": "./extensions/live-compaction",
+			"@shared": "./extensions/_shared"
+		}
+	},
+	"overrides": [
+		{
+			"files": ["**/*.test.ts", "**/*.spec.ts", "**/test/**"],
+			"rules": {
+				"no-console": "off",
+				"typescript/no-non-null-assertion": "off"
+			}
+		},
+		{
+			"files": ["**/*.config.ts", "**/*.config.mjs", "commitlint.config.mjs"],
+			"rules": {
+				"import/no-default-export": "off",
+				"no-console": "off"
+			}
+		}
+	]
+}

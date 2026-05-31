@@ -1,4 +1,4 @@
-export const COMPACTION_ATTEMPT_CUSTOM_TYPE = "live-compaction.attempt";
+export const COMPACTION_ATTEMPT_CUSTOM_TYPE = 'live-compaction.attempt';
 
 export type AppendEntry = (customType: string, data?: unknown) => void;
 
@@ -7,13 +7,13 @@ export type CompactionAttemptEntry = {
 	attemptId: string;
 	timestamp: number;
 	event:
-		| "start"
-		| "request_rendered"
-		| "stream_recovered"
-		| "success"
-		| "preset_failed"
-		| "failed"
-		| "aborted";
+		| 'start'
+		| 'request_rendered'
+		| 'stream_recovered'
+		| 'success'
+		| 'preset_failed'
+		| 'failed'
+		| 'aborted';
 	focusInput?: string;
 	focusText?: string;
 	presetQuery?: string;
@@ -40,7 +40,7 @@ export type CompactionAttemptEntry = {
 export function appendCompactionAttemptEntry(
 	appendEntry: AppendEntry | undefined,
 	attemptId: string | undefined,
-	entry: Omit<CompactionAttemptEntry, "schemaVersion" | "attemptId" | "timestamp">,
+	entry: Omit<CompactionAttemptEntry, 'schemaVersion' | 'attemptId' | 'timestamp'>,
 ): void {
 	if (!appendEntry || !attemptId) return;
 	try {

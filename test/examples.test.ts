@@ -7,10 +7,10 @@
  *   UPDATE_EXAMPLES=1 pnpm test
  */
 
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,15 +21,15 @@ import {
 	renderExample,
 	shouldUpdate,
 	writeExpected,
-} from "./example-runner";
+} from './example-runner';
 
-const EXAMPLES_ROOT = path.join(__dirname, "..", "examples");
+const EXAMPLES_ROOT = path.join(__dirname, '..', 'examples');
 
 const examples = await discoverExamples(EXAMPLES_ROOT);
 
-describe("examples (declarative cases)", () => {
+describe('examples (declarative cases)', () => {
 	if (examples.length === 0) {
-		it.skip("no examples discovered", () => {
+		it.skip('no examples discovered', () => {
 			/* placeholder */
 		});
 		return;

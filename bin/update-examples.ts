@@ -11,21 +11,16 @@
  *   tsx bin/update-examples.ts <name>...  update only the named subset
  */
 
-import path from "node:path";
-import process from "node:process";
-import { fileURLToPath } from "node:url";
+import path from 'node:path';
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-import {
-	discoverExamples,
-	loadCase,
-	renderExample,
-	writeExpected,
-} from "../test/example-runner";
+import { discoverExamples, loadCase, renderExample, writeExpected } from '@test/example-runner';
 
 async function main(): Promise<void> {
-	const examplesRoot = path.join(__dirname, "..", "examples");
+	const examplesRoot = path.join(__dirname, '..', 'examples');
 	const filter = new Set(process.argv.slice(2));
 	const examples = await discoverExamples(examplesRoot);
 	if (examples.length === 0) {
@@ -44,7 +39,7 @@ async function main(): Promise<void> {
 	}
 
 	if (filter.size > 0 && updated === 0) {
-		process.stderr.write(`No examples matched filter: ${[...filter].join(", ")}\n`);
+		process.stderr.write(`No examples matched filter: ${[...filter].join(', ')}\n`);
 		process.exit(1);
 	}
 	process.stdout.write(`\nUpdated ${updated} example(s).\n`);

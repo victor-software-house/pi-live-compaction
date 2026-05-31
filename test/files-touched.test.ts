@@ -11,17 +11,17 @@
  * label.
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from 'vitest';
 
-import type { FilesTouchedEntry } from "../extensions/_shared/files-touched-core";
+import type { FilesTouchedEntry } from '@shared/files-touched-core';
 import {
 	formatManifestOperations,
 	renderFilesTouchedManifestBlock,
-} from "../extensions/_shared/files-touched-manifest";
+} from '@shared/files-touched-manifest';
 
 function entry(
 	displayPath: string,
-	ops: Array<"read" | "write" | "edit" | "move" | "delete">,
+	ops: Array<'read' | 'write' | 'edit' | 'move' | 'delete'>,
 ): FilesTouchedEntry {
 	return {
 		path: `/abs/${displayPath}`,
@@ -31,37 +31,35 @@ function entry(
 	};
 }
 
-describe("renderFilesTouchedManifestBlock", () => {
-	it("renders one row per file, no `undefined` tokens", () => {
+describe('renderFilesTouchedManifestBlock', () => {
+	it('renders one row per file, no `undefined` tokens', () => {
 		const block = renderFilesTouchedManifestBlock([
-			entry("README.md", ["read", "edit"]),
-			entry("CHANGELOG.md", ["write"]),
-			entry("src/old.ts", ["delete"]),
+			entry('README.md', ['read', 'edit']),
+			entry('CHANGELOG.md', ['write']),
+			entry('src/old.ts', ['delete']),
 		]);
-		expect(block).not.toContain("undefined");
-		expect(block).toContain("RE  README.md");
-		expect(block).toContain("W  CHANGELOG.md");
-		expect(block).toContain("D  src/old.ts");
+		expect(block).not.toContain('undefined');
+		expect(block).toContain('RE  README.md');
+		expect(block).toContain('W  CHANGELOG.md');
+		expect(block).toContain('D  src/old.ts');
 	});
 
-	it("returns empty string when there are no entries", () => {
-		expect(renderFilesTouchedManifestBlock([])).toBe("");
+	it('returns empty string when there are no entries', () => {
+		expect(renderFilesTouchedManifestBlock([])).toBe('');
 	});
 
-	it("skips rows where ops are empty (defensive)", () => {
+	it('skips rows where ops are empty (defensive)', () => {
 		const block = renderFilesTouchedManifestBlock([
-			entry("README.md", []),
-			entry("CHANGELOG.md", ["write"]),
+			entry('README.md', []),
+			entry('CHANGELOG.md', ['write']),
 		]);
-		expect(block).not.toContain("README.md");
-		expect(block).toContain("W  CHANGELOG.md");
+		expect(block).not.toContain('README.md');
+		expect(block).toContain('W  CHANGELOG.md');
 	});
 
-	it("formatManifestOperations preserves operation order R/W/E/M/D", () => {
-		expect(
-			formatManifestOperations(
-				entry("x", ["delete", "read", "edit", "move", "write"]),
-			),
-		).toBe("RWEMD");
+	it('formatManifestOperations preserves operation order R/W/E/M/D', () => {
+		expect(formatManifestOperations(entry('x', ['delete', 'read', 'edit', 'move', 'write']))).toBe(
+			'RWEMD',
+		);
 	});
 });

@@ -5,30 +5,36 @@ Use these section headings exactly. Omit a section only if it is truly empty. Pr
 ## Purpose
 Objective or question being pursued on this branch. Include the specific user ask or quoted wording when it materially shaped the branch.
 
-## User intent & branch delta
-What the user was trying to learn, change, or prove in this branch; what changed relative to the shared ancestor; and which asks remain relevant outside this branch.
+## All user messages on this branch
+List every user message on this branch, in chronological order, not tool results or bash outputs. Quote each one verbatim or very close. The most recent messages are the most critical. Do not summarize, condense, or omit any user message. These are the ground truth for what was asked and how intent evolved on this branch. If an authoritative user-message excerpts block is present, use it as a cross-check.
 
 ## Outcome
-Concrete results, findings, and insights worth carrying forward.
+Concrete results, findings, and insights. Separate explicitly:
+- **Reusable**: findings, decisions, or artifacts worth carrying back to the main line
+- **Branch-local**: work that was only relevant to this branch's experiment or detour, and should not be retried without new evidence
+
+## Errors, fixes, and dead ends
+Errors encountered and how they were resolved, with exact error text where useful. Approaches that failed, were disproven, or were explicitly ruled out — and why — so they are not retried.
 
 ## Constraints & preferences
 Requirements, preferences, or constraints that shaped the work on this branch.
 
 ## Key decisions
-Decisions made with brief rationale, including approaches tried, disproven, or ruled out.
+Decisions made with brief rationale. Separate design choices from error-driven corrections.
 
 ## Status
-What is done, what is in progress, what remains unverified, what is unresolved or blocked, and what should not be retried without new evidence. Distinguish observed facts from inferences.
+What is done, what is in progress, what remains unverified, what is unresolved or blocked, and what should not be retried without new evidence. Use markers: [DONE], [IN PROGRESS], [TODO], [BLOCKED], [FAILED], [UNVERIFIED]. Distinguish observed facts from inferences.
 
 ## Next steps
-Concrete actions for continuing this work, in order. Note dependencies between steps.
+Concrete actions for continuing this branch's work, in order. These must relate to the branch purpose — not to unrelated session-level goals. If the branch is concluded, state whether the findings should be merged, cherry-picked, or discarded. Note dependencies between steps.
 
 ## Mandatory reading
 Exact file paths relevant to this branch's work.
 
 # Style
+- This is a branch summary for understanding a branch during /tree navigation, not a full compaction checkpoint
 - Keep the summary concise and continuation-friendly
-- Preserve exact file paths, symbol names, commands, error text, and user wording where useful
+- Preserve exact file paths, symbol names, commands, error text, and user wording
 - Make it obvious what is reusable versus branch-local
-- If a files-touched or user-message block is present, use it as authoritative context but do not repeat it exhaustively
+- If a files-touched or user-message block is present, treat it as authoritative but do not repeat it exhaustively
 - Output only markdown for the summary

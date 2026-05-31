@@ -11,27 +11,26 @@
  * came out as rows of `undefined` in real sessions.
  */
 
-import type { FilesTouchedEntry } from "./files-touched-core";
+import type { FilesTouchedEntry } from './files-touched-core';
 
-export const FILES_TOUCHED_HEADING = "## Files touched";
-export const FILES_TOUCHED_LEGEND =
-	"R=read, W=write, E=edit, M=move/rename, D=delete";
+export const FILES_TOUCHED_HEADING = '## Files touched';
+export const FILES_TOUCHED_LEGEND = 'R=read, W=write, E=edit, M=move/rename, D=delete';
 
 export function formatManifestOperations(file: FilesTouchedEntry): string {
 	const ops: string[] = [];
-	if (file.operations.has("read")) ops.push("R");
-	if (file.operations.has("write")) ops.push("W");
-	if (file.operations.has("edit")) ops.push("E");
-	if (file.operations.has("move")) ops.push("M");
-	if (file.operations.has("delete")) ops.push("D");
-	return ops.join("");
+	if (file.operations.has('read')) ops.push('R');
+	if (file.operations.has('write')) ops.push('W');
+	if (file.operations.has('edit')) ops.push('E');
+	if (file.operations.has('move')) ops.push('M');
+	if (file.operations.has('delete')) ops.push('D');
+	return ops.join('');
 }
 
 export function renderFilesTouchedManifestBlock(
 	files: FilesTouchedEntry[],
 	heading = FILES_TOUCHED_HEADING,
 ): string {
-	if (files.length === 0) return "";
+	if (files.length === 0) return '';
 
 	const lines = files
 		.map((f) => {
@@ -42,9 +41,7 @@ export function renderFilesTouchedManifestBlock(
 		})
 		.filter((line): line is string => line !== null);
 
-	if (lines.length === 0) return "";
+	if (lines.length === 0) return '';
 
-	return [heading, FILES_TOUCHED_LEGEND, "", "```text", ...lines, "```"].join(
-		"\n",
-	);
+	return [heading, FILES_TOUCHED_LEGEND, '', '```text', ...lines, '```'].join('\n');
 }

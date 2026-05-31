@@ -1,9 +1,9 @@
-import * as fs from "node:fs";
-import path from "node:path";
+import * as fs from 'node:fs';
+import path from 'node:path';
 
-import type { SessionEntry } from "@earendil-works/pi-coding-agent";
+import type { SessionEntry } from '@earendil-works/pi-coding-agent';
 
-export type FileTouchOperation = "read" | "write" | "edit" | "move" | "delete";
+export type FileTouchOperation = 'read' | 'write' | 'edit' | 'move' | 'delete';
 
 export interface FilesTouchedEntry {
 	path: string;
@@ -18,8 +18,8 @@ type FileMove = {
 };
 
 type FileTrackingAction =
-	| { kind: "touch"; path: string; operation: FileTouchOperation }
-	| { kind: "move"; from: string; to: string };
+	| { kind: 'touch'; path: string; operation: FileTouchOperation }
+	| { kind: 'move'; from: string; to: string };
 
 type TrackedTouchRecord = {
 	path: string;
@@ -55,20 +55,20 @@ function uniqStrings(values: string[]): string[] {
 }
 
 function normalizePathSeparators(value: string): string {
-	return value.replace(/\\/g, "/");
+	return value.replace(/\\/g, '/');
 }
 
 function normalizeSegments(value: string): string {
 	const normalized = normalizePathSeparators(value);
 	const segments: string[] = [];
 
-	for (const segment of normalized.split("/")) {
-		if (!segment || segment === ".") {
+	for (const segment of normalized.split('/')) {
+		if (!segment || segment === '.') {
 			continue;
 		}
 
-		if (segment === "..") {
-			if (segments.length > 0 && segments[segments.length - 1] !== "..") {
+		if (segment === '..') {
+			if (segments.length > 0 && segments[segments.length - 1] !== '..') {
 				segments.pop();
 				continue;
 			}
@@ -77,7 +77,7 @@ function normalizeSegments(value: string): string {
 		segments.push(segment);
 	}
 
-	return segments.join("/");
+	return segments.join('/');
 }
 
 function normalizeRelativePath(value: string): string {
@@ -88,26 +88,26 @@ function normalizeAbsolutePath(value: string): string {
 	const normalized = normalizePathSeparators(value.trim());
 	const windowsMatch = normalized.match(/^([A-Za-z]:)(?:\/(.*))?$/);
 	if (windowsMatch) {
-		const segments = normalizeSegments(windowsMatch[2] ?? "");
+		const segments = normalizeSegments(windowsMatch[2] ?? '');
 		return segments ? `${windowsMatch[1]}/${segments}` : `${windowsMatch[1]}/`;
 	}
 
 	const segments = normalizeSegments(normalized);
-	return segments ? `/${segments}` : "/";
+	return segments ? `/${segments}` : '/';
 }
 
 function isAbsolutePath(value: string): boolean {
 	const normalized = normalizePathSeparators(value.trim());
-	return normalized.startsWith("/") || /^[A-Za-z]:\//.test(normalized);
+	return normalized.startsWith('/') || /^[A-Za-z]:\//.test(normalized);
 }
 
 function stripReadSliceSuffix(value: string): string {
-	return value.replace(/:(\d+)-(\d+)$/, "");
+	return value.replace(/:(\d+)-(\d+)$/, '');
 }
 
 function firstDefinedString(...values: Array<unknown>): string | null {
 	for (const value of values) {
-		if (typeof value === "string" && value.length > 0) {
+		if (typeof value === 'string' && value.length > 0) {
 			return value;
 		}
 	}
@@ -126,7 +126,7 @@ function parseRootPrefixedPath(value: string): ParsedRootPrefixedPath | null {
 		return null;
 	}
 
-	const relativePath = normalizeRelativePath(match[2] ?? "");
+	const relativePath = normalizeRelativePath(match[2] ?? '');
 	if (!relativePath) {
 		return null;
 	}
@@ -138,13 +138,10 @@ function parseRootPrefixedPath(value: string): ParsedRootPrefixedPath | null {
 }
 
 function splitPathSegments(value: string): string[] {
-	return normalizePathSeparators(value).split("/").filter(Boolean);
+	return normalizePathSeparators(value).split('/').filter(Boolean);
 }
 
-function deriveRootFromAbsoluteAndRelative(
-	absPath: string,
-	relativePath: string,
-): string | null {
+function deriveRootFromAbsoluteAndRelative(absPath: string, relativePath: string): string | null {
 	const absSegments = splitPathSegments(normalizeAbsolutePath(absPath));
 	const relSegments = splitPathSegments(normalizeRelativePath(relativePath));
 	if (relSegments.length === 0 || absSegments.length <= relSegments.length) {
@@ -152,22 +149,17 @@ function deriveRootFromAbsoluteAndRelative(
 	}
 
 	for (let index = 1; index <= relSegments.length; index += 1) {
-		if (
-			absSegments[absSegments.length - index] !==
-			relSegments[relSegments.length - index]
-		) {
+		if (absSegments[absSegments.length - index] !== relSegments[relSegments.length - index]) {
 			return null;
 		}
 	}
 
-	return `/${absSegments.slice(0, absSegments.length - relSegments.length).join("/")}`;
+	return `/${absSegments.slice(0, absSegments.length - relSegments.length).join('/')}`;
 }
 
 function inferRootMappings(paths: string[]): Map<string, string> {
 	const absolutePaths = uniqStrings(
-		paths
-			.filter((value) => isAbsolutePath(value))
-			.map((value) => normalizeAbsolutePath(value)),
+		paths.filter((value) => isAbsolutePath(value)).map((value) => normalizeAbsolutePath(value)),
 	);
 	const rootRefs = paths
 		.map((value) => parseRootPrefixedPath(value))
@@ -177,19 +169,13 @@ function inferRootMappings(paths: string[]): Map<string, string> {
 	for (const ref of rootRefs) {
 		const rootScores = scoresByRoot.get(ref.root) ?? new Map<string, number>();
 		for (const absolutePath of absolutePaths) {
-			const candidateRoot = deriveRootFromAbsoluteAndRelative(
-				absolutePath,
-				ref.relativePath,
-			);
+			const candidateRoot = deriveRootFromAbsoluteAndRelative(absolutePath, ref.relativePath);
 			if (!candidateRoot) {
 				continue;
 			}
 
 			const bonus = path.basename(candidateRoot) === ref.root ? 2 : 1;
-			rootScores.set(
-				candidateRoot,
-				(rootScores.get(candidateRoot) ?? 0) + bonus,
-			);
+			rootScores.set(candidateRoot, (rootScores.get(candidateRoot) ?? 0) + bonus);
 		}
 
 		scoresByRoot.set(ref.root, rootScores);
@@ -197,9 +183,7 @@ function inferRootMappings(paths: string[]): Map<string, string> {
 
 	const out = new Map<string, string>();
 	for (const [root, scores] of scoresByRoot) {
-		const ranked = [...scores.entries()].sort(
-			(left, right) => right[1] - left[1],
-		);
+		const ranked = [...scores.entries()].sort((left, right) => right[1] - left[1]);
 		if (ranked.length === 0) {
 			continue;
 		}
@@ -226,10 +210,7 @@ function getCurrentRootInfo(cwd: string | null | undefined): RootInfo | null {
 	};
 }
 
-function buildRootMappings(
-	paths: string[],
-	cwd: string | null | undefined,
-): Map<string, string> {
+function buildRootMappings(paths: string[], cwd: string | null | undefined): Map<string, string> {
 	const mappings = inferRootMappings(paths);
 	const currentRoot = getCurrentRootInfo(cwd);
 	if (currentRoot) {
@@ -254,10 +235,7 @@ function findRootForAbsolutePath(
 	} | null = null;
 
 	for (const [root, rootPath] of rootMappings) {
-		if (
-			!isWithinPath(normalizedAbsolutePath, rootPath) ||
-			normalizedAbsolutePath === rootPath
-		) {
+		if (!isWithinPath(normalizedAbsolutePath, rootPath) || normalizedAbsolutePath === rootPath) {
 			continue;
 		}
 
@@ -271,9 +249,7 @@ function findRootForAbsolutePath(
 		}
 	}
 
-	return bestMatch
-		? { root: bestMatch.root, relativePath: bestMatch.relativePath }
-		: null;
+	return bestMatch ? { root: bestMatch.root, relativePath: bestMatch.relativePath } : null;
 }
 
 function normalizeTrackedPath(
@@ -283,7 +259,7 @@ function normalizeTrackedPath(
 ): string {
 	const strippedPath = stripReadSliceSuffix(pathValue.trim());
 	if (!strippedPath) {
-		return "";
+		return '';
 	}
 
 	const rootPrefixed = parseRootPrefixedPath(strippedPath);
@@ -293,27 +269,22 @@ function normalizeTrackedPath(
 
 	if (isAbsolutePath(strippedPath)) {
 		const rooted = findRootForAbsolutePath(strippedPath, rootMappings);
-		return rooted
-			? `${rooted.root}:${rooted.relativePath}`
-			: normalizeAbsolutePath(strippedPath);
+		return rooted ? `${rooted.root}:${rooted.relativePath}` : normalizeAbsolutePath(strippedPath);
 	}
 
 	const currentRoot = getCurrentRootInfo(cwd);
 	let relativePath = strippedPath;
 	if (
 		currentRoot &&
-		(relativePath === currentRoot.name ||
-			relativePath.startsWith(`${currentRoot.name}/`))
+		(relativePath === currentRoot.name || relativePath.startsWith(`${currentRoot.name}/`))
 	) {
 		relativePath =
-			relativePath === currentRoot.name
-				? ""
-				: relativePath.slice(currentRoot.name.length + 1);
+			relativePath === currentRoot.name ? '' : relativePath.slice(currentRoot.name.length + 1);
 	}
 
 	const normalizedRelativePath = normalizeRelativePath(relativePath);
 	if (!normalizedRelativePath) {
-		return currentRoot?.absolutePath ?? "";
+		return currentRoot?.absolutePath ?? '';
 	}
 
 	const rootedRelative = [...rootMappings.keys()]
@@ -323,9 +294,7 @@ function normalizeTrackedPath(
 		return `${rootedRelative}:${normalizedRelativePath.slice(rootedRelative.length + 1)}`;
 	}
 
-	return currentRoot
-		? `${currentRoot.name}:${normalizedRelativePath}`
-		: normalizedRelativePath;
+	return currentRoot ? `${currentRoot.name}:${normalizedRelativePath}` : normalizedRelativePath;
 }
 
 function resolveCanonicalPath(
@@ -346,9 +315,7 @@ function resolveCanonicalPath(
 		const currentRoot = getCurrentRootInfo(cwd);
 		const rootPath =
 			rootMappings.get(rootPrefixed.root) ??
-			(currentRoot?.name === rootPrefixed.root
-				? currentRoot.absolutePath
-				: null);
+			(currentRoot?.name === rootPrefixed.root ? currentRoot.absolutePath : null);
 		if (!rootPath) {
 			return canonicalPath;
 		}
@@ -376,10 +343,7 @@ function fallbackDisplayPath(canonicalPath: string): string {
 	return `${rootPrefixed.root}/${rootPrefixed.relativePath}`;
 }
 
-function findRepoRootForDisplay(
-	absolutePath: string,
-	currentRoot: string | null,
-): string | null {
+function findRepoRootForDisplay(absolutePath: string, currentRoot: string | null): string | null {
 	const normalizedAbsolutePath = normalizeAbsolutePath(absolutePath);
 	if (currentRoot && isWithinPath(normalizedAbsolutePath, currentRoot)) {
 		return currentRoot;
@@ -396,7 +360,7 @@ function findRepoRootForDisplay(
 	}
 
 	while (true) {
-		if (fs.existsSync(path.join(candidate, ".git"))) {
+		if (fs.existsSync(path.join(candidate, '.git'))) {
 			return candidate;
 		}
 
@@ -422,24 +386,16 @@ function displayPathForTrackedPath(
 		return resolvedPath.slice(currentRoot.absolutePath.length + 1);
 	}
 
-	const repoRoot = findRepoRootForDisplay(
-		resolvedPath,
-		currentRoot?.absolutePath ?? null,
-	);
+	const repoRoot = findRepoRootForDisplay(resolvedPath, currentRoot?.absolutePath ?? null);
 	if (!repoRoot || !isWithinPath(resolvedPath, repoRoot)) {
 		return fallbackDisplayPath(canonicalPath) || resolvedPath;
 	}
 
 	const relativePath = resolvedPath.slice(repoRoot.length + 1);
-	return relativePath
-		? `${path.basename(repoRoot)}/${relativePath}`
-		: path.basename(repoRoot);
+	return relativePath ? `${path.basename(repoRoot)}/${relativePath}` : path.basename(repoRoot);
 }
 
-function resolveMoveRedirect(
-	pathValue: string,
-	redirects: Map<string, string>,
-): string {
+function resolveMoveRedirect(pathValue: string, redirects: Map<string, string>): string {
 	let current = pathValue;
 	const seen = new Set<string>();
 
@@ -451,23 +407,20 @@ function resolveMoveRedirect(
 	return current;
 }
 
-function extractJsonObject(
-	text: string,
-	prefix: string,
-): Record<string, unknown> | null {
+function extractJsonObject(text: string, prefix: string): Record<string, unknown> | null {
 	const trimmed = text.trim();
 	if (!trimmed.startsWith(prefix)) {
 		return null;
 	}
 
 	const jsonText = trimmed.slice(prefix.length).trim();
-	if (!jsonText.startsWith("{")) {
+	if (!jsonText.startsWith('{')) {
 		return null;
 	}
 
 	try {
 		const parsed = JSON.parse(jsonText);
-		return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+		return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
 			? (parsed as Record<string, unknown>)
 			: null;
 	} catch {
@@ -476,10 +429,8 @@ function extractJsonObject(
 }
 
 function extractCliNamedArg(cmd: string, key: string): string | null {
-	const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-	const match = cmd.match(
-		new RegExp(`(?:^|\\s)${escapedKey}=(?:"([^"]+)"|'([^']+)'|(\\S+))`),
-	);
+	const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const match = cmd.match(new RegExp(`(?:^|\\s)${escapedKey}=(?:"([^"]+)"|'([^']+)'|(\\S+))`));
 	return firstDefinedString(...(match?.slice(1) ?? []));
 }
 
@@ -489,22 +440,14 @@ function commandStartsWith(cmd: string, name: string): boolean {
 }
 
 function extractReadPathFromCliCommand(cmd: string): string | null {
-	const readFileMatch = cmd.match(
-		/(?:^|\s)read_file\s+.*?\bpath=(?:"([^"]+)"|'([^']+)'|(\S+))/,
-	);
+	const readFileMatch = cmd.match(/(?:^|\s)read_file\s+.*?\bpath=(?:"([^"]+)"|'([^']+)'|(\S+))/);
 	if (readFileMatch) {
-		return stripReadSliceSuffix(
-			firstDefinedString(...readFileMatch.slice(1)) ?? "",
-		);
+		return stripReadSliceSuffix(firstDefinedString(...readFileMatch.slice(1)) ?? '');
 	}
 
-	const simpleReadMatch = cmd.match(
-		/^(?:read|cat)\s+(?:"([^"]+)"|'([^']+)'|(\S+))/,
-	);
+	const simpleReadMatch = cmd.match(/^(?:read|cat)\s+(?:"([^"]+)"|'([^']+)'|(\S+))/);
 	if (simpleReadMatch) {
-		return stripReadSliceSuffix(
-			firstDefinedString(...simpleReadMatch.slice(1)) ?? "",
-		);
+		return stripReadSliceSuffix(firstDefinedString(...simpleReadMatch.slice(1)) ?? '');
 	}
 
 	return null;
@@ -512,20 +455,20 @@ function extractReadPathFromCliCommand(cmd: string): string | null {
 
 function tokenizeShellCommand(cmd: string): string[] {
 	const tokens: string[] = [];
-	let current = "";
+	let current = '';
 	let quote: '"' | "'" | null = null;
 	let escaped = false;
 
 	const flush = () => {
 		if (current) {
 			tokens.push(current);
-			current = "";
+			current = '';
 		}
 	};
 
 	for (let index = 0; index < cmd.length; index += 1) {
 		const char = cmd[index];
-		const next = cmd[index + 1] ?? "";
+		const next = cmd[index + 1] ?? '';
 
 		if (escaped) {
 			current += char;
@@ -534,7 +477,7 @@ function tokenizeShellCommand(cmd: string): string[] {
 		}
 
 		if (quote) {
-			if (char === "\\") {
+			if (char === '\\') {
 				escaped = true;
 				continue;
 			}
@@ -548,7 +491,7 @@ function tokenizeShellCommand(cmd: string): string[] {
 			continue;
 		}
 
-		if (char === "\\") {
+		if (char === '\\') {
 			escaped = true;
 			continue;
 		}
@@ -563,20 +506,20 @@ function tokenizeShellCommand(cmd: string): string[] {
 			continue;
 		}
 
-		if (char === ";") {
+		if (char === ';') {
 			flush();
 			tokens.push(char);
 			continue;
 		}
 
-		if ((char === "&" || char === "|") && next === char) {
+		if ((char === '&' || char === '|') && next === char) {
 			flush();
 			tokens.push(char + next);
 			index += 1;
 			continue;
 		}
 
-		if (char === "&" || char === "|") {
+		if (char === '&' || char === '|') {
 			flush();
 			tokens.push(char);
 			continue;
@@ -594,13 +537,7 @@ function splitShellCommands(cmd: string): string[][] {
 	let current: string[] = [];
 
 	for (const token of tokenizeShellCommand(cmd)) {
-		if (
-			token === ";" ||
-			token === "&&" ||
-			token === "||" ||
-			token === "|" ||
-			token === "&"
-		) {
+		if (token === ';' || token === '&&' || token === '||' || token === '|' || token === '&') {
 			if (current.length > 0) {
 				commands.push(current);
 				current = [];
@@ -625,16 +562,13 @@ function stripShellCommandWrappers(tokens: string[]): string[] {
 		current = current.slice(1);
 	}
 
-	for (const wrapper of ["command", "env", "noglob", "sudo"]) {
+	for (const wrapper of ['command', 'env', 'noglob', 'sudo']) {
 		if (current[0] !== wrapper) {
 			continue;
 		}
 
 		current = current.slice(1);
-		while (
-			current.length > 0 &&
-			/^[A-Za-z_][A-Za-z0-9_]*=.*/.test(current[0])
-		) {
+		while (current.length > 0 && /^[A-Za-z_][A-Za-z0-9_]*=.*/.test(current[0])) {
 			current = current.slice(1);
 		}
 	}
@@ -647,12 +581,12 @@ function extractShellOperands(tokens: string[]): string[] {
 	let allowFlags = true;
 
 	for (const token of tokens) {
-		if (allowFlags && token === "--") {
+		if (allowFlags && token === '--') {
 			allowFlags = false;
 			continue;
 		}
 
-		if (allowFlags && token.startsWith("-")) {
+		if (allowFlags && token.startsWith('-')) {
 			continue;
 		}
 
@@ -663,42 +597,37 @@ function extractShellOperands(tokens: string[]): string[] {
 }
 
 function isIgnoredRedirectTarget(value: string): boolean {
-	return (
-		value === "/dev/null" || value === "/dev/stderr" || value === "/dev/stdout"
-	);
+	return value === '/dev/null' || value === '/dev/stderr' || value === '/dev/stdout';
 }
 
-function extractRedirectWriteTargets(
-	tokens: string[],
-	actions: FileTrackingAction[],
-): void {
+function extractRedirectWriteTargets(tokens: string[], actions: FileTrackingAction[]): void {
 	for (let i = 0; i < tokens.length; i++) {
 		const token = tokens[i];
 
-		if (token === ">" || token === ">>") {
+		if (token === '>' || token === '>>') {
 			if (i + 1 < tokens.length && !isIgnoredRedirectTarget(tokens[i + 1])) {
 				actions.push({
-					kind: "touch",
+					kind: 'touch',
 					path: tokens[i + 1],
-					operation: "write",
+					operation: 'write',
 				});
 			}
 			i += 1;
 			continue;
 		}
 
-		if (token.startsWith(">>") && token.length > 2) {
+		if (token.startsWith('>>') && token.length > 2) {
 			const target = token.slice(2);
 			if (!isIgnoredRedirectTarget(target)) {
-				actions.push({ kind: "touch", path: target, operation: "write" });
+				actions.push({ kind: 'touch', path: target, operation: 'write' });
 			}
 			continue;
 		}
 
-		if (token.startsWith(">") && token.length > 1) {
+		if (token.startsWith('>') && token.length > 1) {
 			const target = token.slice(1);
 			if (!isIgnoredRedirectTarget(target)) {
-				actions.push({ kind: "touch", path: target, operation: "write" });
+				actions.push({ kind: 'touch', path: target, operation: 'write' });
 			}
 		}
 	}
@@ -714,21 +643,21 @@ function stripRedirectTokens(tokens: string[]): string[] {
 	for (let i = 0; i < tokens.length; i++) {
 		const token = tokens[i];
 
-		if (token === ">" || token === ">>" || token === ">|" || token === "<") {
+		if (token === '>' || token === '>>' || token === '>|' || token === '<') {
 			i += 1;
 			continue;
 		}
 
-		if (token === "<<" || token === "<<-" || token === "<<~") {
+		if (token === '<<' || token === '<<-' || token === '<<~') {
 			i += 1;
 			continue;
 		}
 
 		if (
-			token.startsWith(">>") ||
-			token.startsWith(">") ||
-			token.startsWith("<<") ||
-			token.startsWith("<")
+			token.startsWith('>>') ||
+			token.startsWith('>') ||
+			token.startsWith('<<') ||
+			token.startsWith('<')
 		) {
 			continue;
 		}
@@ -740,7 +669,7 @@ function stripRedirectTokens(tokens: string[]): string[] {
 }
 
 function stripHeredocBodies(cmd: string): string {
-	const lines = cmd.split("\n");
+	const lines = cmd.split('\n');
 	const result: string[] = [];
 	let terminator: string | null = null;
 	let justClosedHeredoc = false;
@@ -767,7 +696,7 @@ function stripHeredocBodies(cmd: string): string {
 		}
 	}
 
-	return result.join("\n");
+	return result.join('\n');
 }
 
 function parseBashActions(cmd: string): FileTrackingAction[] {
@@ -781,99 +710,96 @@ function parseBashActions(cmd: string): FileTrackingAction[] {
 			continue;
 		}
 
-		if (command[0] === "git" && command[1] === "mv") {
+		if (command[0] === 'git' && command[1] === 'mv') {
 			const operands = extractShellOperands(command.slice(2));
 			if (operands.length === 2) {
-				actions.push({ kind: "move", from: operands[0], to: operands[1] });
+				actions.push({ kind: 'move', from: operands[0], to: operands[1] });
 			}
 			continue;
 		}
 
-		if (command[0] === "git" && command[1] === "rm") {
+		if (command[0] === 'git' && command[1] === 'rm') {
 			for (const operand of extractShellOperands(command.slice(2))) {
-				actions.push({ kind: "touch", path: operand, operation: "delete" });
+				actions.push({ kind: 'touch', path: operand, operation: 'delete' });
 			}
 			continue;
 		}
 
-		if (command[0] === "mv") {
+		if (command[0] === 'mv') {
 			const operands = extractShellOperands(command.slice(1));
 			if (operands.length === 2) {
-				actions.push({ kind: "move", from: operands[0], to: operands[1] });
+				actions.push({ kind: 'move', from: operands[0], to: operands[1] });
 			}
 			continue;
 		}
 
 		if (
-			command[0] === "rm" ||
-			command[0] === "trash" ||
-			command[0] === "trash-put" ||
-			command[0] === "unlink"
+			command[0] === 'rm' ||
+			command[0] === 'trash' ||
+			command[0] === 'trash-put' ||
+			command[0] === 'unlink'
 		) {
 			for (const operand of extractShellOperands(command.slice(1))) {
-				actions.push({ kind: "touch", path: operand, operation: "delete" });
+				actions.push({ kind: 'touch', path: operand, operation: 'delete' });
 			}
 			continue;
 		}
 
-		if (command[0] === "sed") {
+		if (command[0] === 'sed') {
 			if (command.some((t) => /^-[a-z]*i/.test(t))) {
-				const hasExplicitExpr = command.some((t) => t === "-e" || t === "-f");
+				const hasExplicitExpr = command.some((t) => t === '-e' || t === '-f');
 				const operands = extractShellOperands(command.slice(1));
 				const fileOperands = hasExplicitExpr ? operands : operands.slice(1);
 				for (const operand of fileOperands) {
 					if (!looksLikeSedExpression(operand)) {
-						actions.push({ kind: "touch", path: operand, operation: "edit" });
+						actions.push({ kind: 'touch', path: operand, operation: 'edit' });
 					}
 				}
 			}
 			continue;
 		}
 
-		if (command[0] === "cp" || command[0] === "rsync") {
+		if (command[0] === 'cp' || command[0] === 'rsync') {
 			const operands = extractShellOperands(command.slice(1));
 			if (operands.length >= 2) {
 				actions.push({
-					kind: "touch",
+					kind: 'touch',
 					path: operands[operands.length - 1],
-					operation: "write",
+					operation: 'write',
 				});
 			}
 			continue;
 		}
 
-		if (command[0] === "tee") {
+		if (command[0] === 'tee') {
 			for (const operand of extractShellOperands(command.slice(1))) {
-				actions.push({ kind: "touch", path: operand, operation: "write" });
+				actions.push({ kind: 'touch', path: operand, operation: 'write' });
 			}
 			continue;
 		}
 
-		if (command[0] === "touch") {
+		if (command[0] === 'touch') {
 			for (const operand of extractShellOperands(command.slice(1))) {
-				actions.push({ kind: "touch", path: operand, operation: "write" });
+				actions.push({ kind: 'touch', path: operand, operation: 'write' });
 			}
 			continue;
 		}
 
-		if (command[0] === "patch") {
+		if (command[0] === 'patch') {
 			const operands = extractShellOperands(command.slice(1));
 			if (operands.length >= 1) {
-				actions.push({ kind: "touch", path: operands[0], operation: "edit" });
+				actions.push({ kind: 'touch', path: operands[0], operation: 'edit' });
 			}
 			continue;
 		}
 
-		if (command[0] === "curl") {
+		if (command[0] === 'curl') {
 			for (let i = 1; i < command.length; i++) {
-				if (
-					(command[i] === "-o" || command[i] === "--output") &&
-					i + 1 < command.length
-				) {
+				if ((command[i] === '-o' || command[i] === '--output') && i + 1 < command.length) {
 					actions.push({
-						kind: "touch",
+						kind: 'touch',
 						path: command[i + 1],
-						operation: "write",
+						operation: 'write',
 					});
 					break;
 				}
@@ -881,16 +807,13 @@ function parseBashActions(cmd: string): FileTrackingAction[] {
 			continue;
 		}
 
-		if (command[0] === "wget") {
+		if (command[0] === 'wget') {
 			for (let i = 1; i < command.length; i++) {
-				if (
-					(command[i] === "-O" || command[i] === "--output-document") &&
-					i + 1 < command.length
-				) {
+				if ((command[i] === '-O' || command[i] === '--output-document') && i + 1 < command.length) {
 					actions.push({
-						kind: "touch",
+						kind: 'touch',
 						path: command[i + 1],
-						operation: "write",
+						operation: 'write',
 					});
 					break;
 				}
@@ -898,13 +821,9 @@ function parseBashActions(cmd: string): FileTrackingAction[] {
 			continue;
 		}
 
-		if (
-			command[0] === "cat" ||
-			command[0] === "head" ||
-			command[0] === "tail"
-		) {
+		if (command[0] === 'cat' || command[0] === 'head' || command[0] === 'tail') {
 			for (const operand of extractShellOperands(command.slice(1))) {
-				actions.push({ kind: "touch", path: operand, operation: "read" });
+				actions.push({ kind: 'touch', path: operand, operation: 'read' });
 			}
 		}
 	}
@@ -920,149 +839,138 @@ function parseRpExecActions(cmd: string): FileTrackingAction[] {
 
 	const actions: FileTrackingAction[] = [];
 
-	const readFileArgs = extractJsonObject(normalized, "call read_file");
-	if (readFileArgs && typeof readFileArgs.path === "string") {
+	const readFileArgs = extractJsonObject(normalized, 'call read_file');
+	if (readFileArgs && typeof readFileArgs.path === 'string') {
 		actions.push({
-			kind: "touch",
+			kind: 'touch',
 			path: stripReadSliceSuffix(readFileArgs.path),
-			operation: "read",
+			operation: 'read',
 		});
 	}
 
-	const applyEditsArgs = extractJsonObject(normalized, "call apply_edits");
-	if (applyEditsArgs && typeof applyEditsArgs.path === "string") {
+	const applyEditsArgs = extractJsonObject(normalized, 'call apply_edits');
+	if (applyEditsArgs && typeof applyEditsArgs.path === 'string') {
 		actions.push({
-			kind: "touch",
+			kind: 'touch',
 			path: applyEditsArgs.path,
-			operation: "edit",
+			operation: 'edit',
 		});
 	}
 
-	const fileActionsArgs = extractJsonObject(normalized, "call file_actions");
+	const fileActionsArgs = extractJsonObject(normalized, 'call file_actions');
 	if (fileActionsArgs) {
-		const action =
-			typeof fileActionsArgs.action === "string" ? fileActionsArgs.action : "";
-		const targetPath =
-			typeof fileActionsArgs.path === "string" ? fileActionsArgs.path : null;
-		const newPath =
-			typeof fileActionsArgs.new_path === "string"
-				? fileActionsArgs.new_path
-				: null;
-		if (action === "create" && targetPath) {
-			actions.push({ kind: "touch", path: targetPath, operation: "write" });
+		const action = typeof fileActionsArgs.action === 'string' ? fileActionsArgs.action : '';
+		const targetPath = typeof fileActionsArgs.path === 'string' ? fileActionsArgs.path : null;
+		const newPath = typeof fileActionsArgs.new_path === 'string' ? fileActionsArgs.new_path : null;
+		if (action === 'create' && targetPath) {
+			actions.push({ kind: 'touch', path: targetPath, operation: 'write' });
 		}
-		if (action === "delete" && targetPath) {
-			actions.push({ kind: "touch", path: targetPath, operation: "delete" });
+		if (action === 'delete' && targetPath) {
+			actions.push({ kind: 'touch', path: targetPath, operation: 'delete' });
 		}
-		if (action === "move" && targetPath && newPath) {
-			actions.push({ kind: "move", from: targetPath, to: newPath });
+		if (action === 'move' && targetPath && newPath) {
+			actions.push({ kind: 'move', from: targetPath, to: newPath });
 		}
 	}
 
-	if (commandStartsWith(normalized, "apply_edits")) {
-		const targetPath = extractCliNamedArg(normalized, "path");
+	if (commandStartsWith(normalized, 'apply_edits')) {
+		const targetPath = extractCliNamedArg(normalized, 'path');
 		if (targetPath) {
-			actions.push({ kind: "touch", path: targetPath, operation: "edit" });
+			actions.push({ kind: 'touch', path: targetPath, operation: 'edit' });
 		}
 	}
 
-	if (commandStartsWith(normalized, "file_actions")) {
-		const action = extractCliNamedArg(normalized, "action");
-		const targetPath = extractCliNamedArg(normalized, "path");
-		const newPath = extractCliNamedArg(normalized, "new_path");
-		if (action === "create" && targetPath) {
-			actions.push({ kind: "touch", path: targetPath, operation: "write" });
+	if (commandStartsWith(normalized, 'file_actions')) {
+		const action = extractCliNamedArg(normalized, 'action');
+		const targetPath = extractCliNamedArg(normalized, 'path');
+		const newPath = extractCliNamedArg(normalized, 'new_path');
+		if (action === 'create' && targetPath) {
+			actions.push({ kind: 'touch', path: targetPath, operation: 'write' });
 		}
-		if (action === "delete" && targetPath) {
-			actions.push({ kind: "touch", path: targetPath, operation: "delete" });
+		if (action === 'delete' && targetPath) {
+			actions.push({ kind: 'touch', path: targetPath, operation: 'delete' });
 		}
-		if (action === "move" && targetPath && newPath) {
-			actions.push({ kind: "move", from: targetPath, to: newPath });
+		if (action === 'move' && targetPath && newPath) {
+			actions.push({ kind: 'move', from: targetPath, to: newPath });
 		}
 	}
 
 	for (const command of splitShellCommands(normalized)) {
-		if (command[0] !== "file") {
+		if (command[0] !== 'file') {
 			continue;
 		}
 
-		if (command[1] === "delete") {
+		if (command[1] === 'delete') {
 			for (const operand of extractShellOperands(command.slice(2))) {
-				actions.push({ kind: "touch", path: operand, operation: "delete" });
+				actions.push({ kind: 'touch', path: operand, operation: 'delete' });
 			}
 			continue;
 		}
 
-		if (command[1] === "move") {
+		if (command[1] === 'move') {
 			const operands = extractShellOperands(command.slice(2));
 			if (operands.length === 2) {
-				actions.push({ kind: "move", from: operands[0], to: operands[1] });
+				actions.push({ kind: 'move', from: operands[0], to: operands[1] });
 			}
 		}
 	}
 
 	const readPath = extractReadPathFromCliCommand(normalized);
 	if (readPath) {
-		actions.push({ kind: "touch", path: readPath, operation: "read" });
+		actions.push({ kind: 'touch', path: readPath, operation: 'read' });
 	}
 
 	return actions;
 }
 
-function getTrackedToolActions(
-	name: string,
-	args: Record<string, unknown>,
-): FileTrackingAction[] {
-	if (
-		(name === "read" || name === "write" || name === "edit") &&
-		typeof args.path === "string"
-	) {
-		return [{ kind: "touch", path: args.path, operation: name }];
+function getTrackedToolActions(name: string, args: Record<string, unknown>): FileTrackingAction[] {
+	if ((name === 'read' || name === 'write' || name === 'edit') && typeof args.path === 'string') {
+		return [{ kind: 'touch', path: args.path, operation: name }];
 	}
 
-	if (name === "rp") {
-		const rpCall = typeof args.call === "string" ? args.call : null;
+	if (name === 'rp') {
+		const rpCall = typeof args.call === 'string' ? args.call : null;
 		const rpArgs =
-			args.args && typeof args.args === "object" && !Array.isArray(args.args)
+			args.args && typeof args.args === 'object' && !Array.isArray(args.args)
 				? (args.args as Record<string, unknown>)
 				: null;
 		if (!rpCall || !rpArgs) {
 			return [];
 		}
 
-		if (rpCall === "read_file" && typeof rpArgs.path === "string") {
-			return [{ kind: "touch", path: rpArgs.path, operation: "read" }];
+		if (rpCall === 'read_file' && typeof rpArgs.path === 'string') {
+			return [{ kind: 'touch', path: rpArgs.path, operation: 'read' }];
 		}
 
-		if (rpCall === "apply_edits" && typeof rpArgs.path === "string") {
-			return [{ kind: "touch", path: rpArgs.path, operation: "edit" }];
+		if (rpCall === 'apply_edits' && typeof rpArgs.path === 'string') {
+			return [{ kind: 'touch', path: rpArgs.path, operation: 'edit' }];
 		}
 
-		if (rpCall === "file_actions") {
-			const action = typeof rpArgs.action === "string" ? rpArgs.action : "";
-			if (action === "create" && typeof rpArgs.path === "string") {
-				return [{ kind: "touch", path: rpArgs.path, operation: "write" }];
+		if (rpCall === 'file_actions') {
+			const action = typeof rpArgs.action === 'string' ? rpArgs.action : '';
+			if (action === 'create' && typeof rpArgs.path === 'string') {
+				return [{ kind: 'touch', path: rpArgs.path, operation: 'write' }];
 			}
-			if (action === "delete" && typeof rpArgs.path === "string") {
-				return [{ kind: "touch", path: rpArgs.path, operation: "delete" }];
+			if (action === 'delete' && typeof rpArgs.path === 'string') {
+				return [{ kind: 'touch', path: rpArgs.path, operation: 'delete' }];
 			}
 			if (
-				action === "move" &&
-				typeof rpArgs.path === "string" &&
-				typeof rpArgs.new_path === "string"
+				action === 'move' &&
+				typeof rpArgs.path === 'string' &&
+				typeof rpArgs.new_path === 'string'
 			) {
-				return [{ kind: "move", from: rpArgs.path, to: rpArgs.new_path }];
+				return [{ kind: 'move', from: rpArgs.path, to: rpArgs.new_path }];
 			}
 		}
 	}
 
-	if (name === "rp_exec") {
-		const cmd = typeof args.cmd === "string" ? args.cmd : "";
+	if (name === 'rp_exec') {
+		const cmd = typeof args.cmd === 'string' ? args.cmd : '';
 		return parseRpExecActions(cmd);
 	}
 
-	if (name === "bash") {
-		const command = typeof args.command === "string" ? args.command : "";
+	if (name === 'bash') {
+		const command = typeof args.command === 'string' ? args.command : '';
 		return parseBashActions(command);
 	}
 
@@ -1070,30 +978,30 @@ function getTrackedToolActions(
 }
 
 function extractTextFromContent(content: unknown): string {
-	if (typeof content === "string") {
+	if (typeof content === 'string') {
 		return content;
 	}
 
 	if (!Array.isArray(content)) {
-		return "";
+		return '';
 	}
 
 	return content
 		.map((block) => {
-			if (!block || typeof block !== "object") {
-				return "";
+			if (!block || typeof block !== 'object') {
+				return '';
 			}
 
-			return typeof (block as { text?: unknown }).text === "string"
+			return typeof (block as { text?: unknown }).text === 'string'
 				? (block as { text: string }).text
-				: "";
+				: '';
 		})
 		.filter(Boolean)
-		.join("\n");
+		.join('\n');
 }
 
 function getToolCallId(value: unknown): string | null {
-	if (!value || typeof value !== "object") {
+	if (!value || typeof value !== 'object') {
 		return null;
 	}
 
@@ -1112,32 +1020,32 @@ export function collectFilesTouched(
 	const toolCalls = new Map<string, FileTrackingAction[]>();
 
 	for (const entry of entries) {
-		if (entry.type !== "message") {
+		if (entry.type !== 'message') {
 			continue;
 		}
 
 		const msg = entry.message;
-		if (msg.role !== "assistant" || !Array.isArray(msg.content)) {
+		if (msg.role !== 'assistant' || !Array.isArray(msg.content)) {
 			continue;
 		}
 
 		for (const block of msg.content) {
 			if (
 				!block ||
-				typeof block !== "object" ||
-				(block as { type?: unknown }).type !== "toolCall"
+				typeof block !== 'object' ||
+				(block as { type?: unknown }).type !== 'toolCall'
 			) {
 				continue;
 			}
 
 			const toolCallId = getToolCallId(block);
 			const toolName =
-				typeof (block as { name?: unknown }).name === "string"
+				typeof (block as { name?: unknown }).name === 'string'
 					? (block as { name: string }).name
-					: "";
+					: '';
 			const args = (block as { arguments?: unknown }).arguments;
 			const argObject =
-				args && typeof args === "object" && !Array.isArray(args)
+				args && typeof args === 'object' && !Array.isArray(args)
 					? (args as Record<string, unknown>)
 					: {};
 			if (!toolCallId || !toolName) {
@@ -1155,12 +1063,12 @@ export function collectFilesTouched(
 	const moves: FileMove[] = [];
 
 	for (const entry of entries) {
-		if (entry.type !== "message") {
+		if (entry.type !== 'message') {
 			continue;
 		}
 
 		const msg = entry.message;
-		if (msg.role !== "toolResult" || msg.isError) {
+		if (msg.role !== 'toolResult' || msg.isError) {
 			continue;
 		}
 
@@ -1179,22 +1087,21 @@ export function collectFilesTouched(
 		}
 
 		const toolResultText = extractTextFromContent(msg.content);
-		const isNoOpEdit =
-			/applied:\s*0|no changes applied|nothing to (?:do|change)/i.test(
-				toolResultText,
-			);
+		const isNoOpEdit = /applied:\s*0|no changes applied|nothing to (?:do|change)/i.test(
+			toolResultText,
+		);
 		for (const action of actions) {
-			if (action.kind === "move") {
+			if (action.kind === 'move') {
 				moves.push({ from: action.from, to: action.to });
 				touches.push({
 					path: action.to,
-					operation: "move",
+					operation: 'move',
 					timestamp: msg.timestamp,
 				});
 				continue;
 			}
 
-			if (isNoOpEdit && action.operation === "edit") {
+			if (isNoOpEdit && action.operation === 'edit') {
 				continue;
 			}
 
@@ -1207,10 +1114,7 @@ export function collectFilesTouched(
 	}
 
 	const rootMappings = buildRootMappings(
-		[
-			...touches.map((touch) => touch.path),
-			...moves.flatMap((move) => [move.from, move.to]),
-		],
+		[...touches.map((touch) => touch.path), ...moves.flatMap((move) => [move.from, move.to])],
 		cwd,
 	);
 	const redirects = new Map<string, string>();
@@ -1222,10 +1126,7 @@ export function collectFilesTouched(
 		}
 	}
 
-	const merged = new Map<
-		string,
-		{ operations: Set<FileTouchOperation>; lastTimestamp: number }
-	>();
+	const merged = new Map<string, { operations: Set<FileTouchOperation>; lastTimestamp: number }>();
 	for (const touch of touches) {
 		const normalizedPath = normalizeTrackedPath(touch.path, rootMappings, cwd);
 		const canonicalPath = resolveMoveRedirect(normalizedPath, redirects);
@@ -1250,19 +1151,11 @@ export function collectFilesTouched(
 
 	const prepared = [...merged.entries()]
 		.map(([canonicalPath, value]) => {
-			const resolvedPath = resolveCanonicalPath(
-				canonicalPath,
-				rootMappings,
-				cwd,
-			);
+			const resolvedPath = resolveCanonicalPath(canonicalPath, rootMappings, cwd);
 			return {
 				canonicalPath,
 				path: resolvedPath,
-				displayPath: displayPathForTrackedPath(
-					canonicalPath,
-					resolvedPath,
-					cwd,
-				),
+				displayPath: displayPathForTrackedPath(canonicalPath, resolvedPath, cwd),
 				operations: value.operations,
 				lastTimestamp: value.lastTimestamp,
 			};
@@ -1271,18 +1164,12 @@ export function collectFilesTouched(
 
 	const displayCounts = new Map<string, number>();
 	for (const file of prepared) {
-		displayCounts.set(
-			file.displayPath,
-			(displayCounts.get(file.displayPath) ?? 0) + 1,
-		);
+		displayCounts.set(file.displayPath, (displayCounts.get(file.displayPath) ?? 0) + 1);
 	}
 
 	return prepared.map((file) => ({
 		path: file.path,
-		displayPath:
-			(displayCounts.get(file.displayPath) ?? 0) > 1
-				? file.path
-				: file.displayPath,
+		displayPath: (displayCounts.get(file.displayPath) ?? 0) > 1 ? file.path : file.displayPath,
 		operations: file.operations,
 		lastTimestamp: file.lastTimestamp,
 	}));
