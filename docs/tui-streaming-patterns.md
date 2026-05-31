@@ -118,39 +118,18 @@ pi.events.on('live-compaction:chunk', ({ text }) => update(text));
 pi.events.on('live-compaction:done', ({ text }) => finish(text));
 ```
 
-### 7. Entry ID capture
-
-`sendMessage` does not return the entry ID. Capture it asynchronously via the
-`message_end` event, which fires after the entry is persisted:
-
-```typescript
-let entryId: string | null = null;
-
-pi.on('message_end', (event, ctx) => {
-  if (event.message.role === 'custom' && event.message.customType === customType && !entryId) {
-    const entries = ctx.sessionManager.getEntries();
-    const entry = [...entries].reverse()
-      .find(e => e.type === 'custom_message' && e.customType === customType);
-    entryId = entry?.id ?? null;
-  }
-});
-```
-
-The one-time reverse scan only happens inside the event handler (not on every
-call). After capture, all access uses `getEntry(entryId)`.
-
-### 8. Cleanup via `session_compact`
+### 7. Cleanup via `session_compact`
 
 `session_compact` fires AFTER compaction is committed but BEFORE
-`compaction_end` triggers `rebuildChatFromMessages()`. This is the tightest
-possible point to hide our message:
+`compaction_end` triggers `rebuildChatFromMessages()`. Look up by `customType`
+directly — no ID tracking needed (only one live message per compaction):
 
 ```typescript
-pi.on('session_compact', (event, ctx) => {
-  if (entryId) {
-    const entry = ctx.sessionManager.getEntry(entryId);
-    if (entry) entry.display = undefined;
-  }
+pi.on('session_compact', (_event, ctx) => {
+  const entries = ctx.sessionManager.getEntries();
+  const entry = [...entries].reverse()
+    .find(e => e.type === 'custom_message' && e.customType === CUSTOM_TYPE);
+  if (entry) entry.display = undefined;
 });
 ```
 
@@ -159,17 +138,13 @@ message is skipped (display is falsy) → Pi's built-in
 `CompactionSummaryMessageComponent` takes over.
 
 The `finish()` function only handles visual state (bg color transition +
-final content). It does NOT touch entry display — that belongs to the
-compaction lifecycle hook.
+final content). Entry cleanup belongs to the compaction lifecycle hook.
 
-**Why entry mutation is safe:**
-- `getEntry(id)` returns the same live object reference as `getEntries()` —
-  confirmed via identity check (`===`). No cloning, no freezing.
-- Lookup by ID is branch-safe: the entry ID is stable across the session tree.
-- We only mutate `display`, a rendering hint. We never insert or remove entries
-  from the session tree — that would break the parent/child chain.
-- Pi's official examples (`snake.ts`, `tools.ts`, `preset.ts`) use `getEntries()`
-  to read and act on live entry objects (see `extensions.md` § pi.appendEntry).
+**Safety:** `getEntries()` returns live mutable objects (not clones — confirmed
+via `===` identity check). We only mutate `display` (a rendering hint), never
+insert or remove entries. Pi's own examples (`snake.ts`, `preset.ts`) rely on
+the same mutable-entry pattern for session state (see `extensions.md` §
+pi.appendEntry).
 
 ## Theme Colors
 
