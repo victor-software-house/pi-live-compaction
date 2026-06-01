@@ -1,8 +1,8 @@
 # pi-live-compaction
 
-## 0.2.0
+## 0.1.0
 
-### Minor Changes
+### Initial Release
 
 - Initial release of pi-live-compaction.
 
