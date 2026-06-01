@@ -22,6 +22,7 @@ import type { HookContext, SummaryProgress } from '@live-compaction/types';
 
 const CUSTOM_TYPE = 'live-compaction-stream';
 const THROTTLE_MS = 150;
+const SPINNER_FRAMES = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 /**
  * Shared mutable state between the registered renderer and the progress
@@ -35,16 +36,25 @@ interface ChatState {
 	headerRef: InstanceType<typeof Text> | null;
 	tuiRef: TUI | null;
 	themeRef: { fg: (key: ThemeColor, text: string) => string } | null;
+	tick: number;
 }
 
 function buildHeaderText(
 	phase: ChatState['phase'],
 	lineCount: number,
 	theme: { fg: (key: ThemeColor, text: string) => string },
+	tick: number,
 ): string {
-	const label = phase === 'done' ? 'done' : 'streaming';
+	if (phase === 'done') {
+		return (
+			theme.fg('accent', '\x1b[1m[compaction · done]\x1b[22m') +
+			' ' +
+			theme.fg('muted', `${lineCount} lines`)
+		);
+	}
+	const spinner = SPINNER_FRAMES[tick % SPINNER_FRAMES.length];
 	return (
-		theme.fg('accent', `\x1b[1m[compaction · ${label}]\x1b[22m`) +
+		theme.fg('accent', `\x1b[1m${spinner} [compaction · streaming]\x1b[22m`) +
 		' ' +
 		theme.fg('muted', `${lineCount} lines`)
 	);
@@ -68,6 +78,7 @@ export function registerCompactionChatMessage(
 		headerRef: null,
 		tuiRef: null,
 		themeRef: null,
+		tick: 0,
 	};
 
 	// ---- Renderer (function form — required, object form silently breaks) ----
@@ -80,7 +91,7 @@ export function registerCompactionChatMessage(
 
 		const content = String(message.content);
 		const lines = content.split('\n').length;
-		const header = new Text(buildHeaderText(state.phase, lines, theme), 0, 0);
+		const header = new Text(buildHeaderText(state.phase, lines, theme, state.tick), 0, 0);
 		box.addChild(header);
 		state.headerRef = header;
 
@@ -118,6 +129,7 @@ export function registerCompactionChatMessage(
 		state.mdRef = null;
 		state.headerRef = null;
 		state.themeRef = null;
+		state.tick = 0;
 	});
 
 	// ---- Progress factory — shares `state` with renderer above ----
@@ -170,7 +182,8 @@ export function registerCompactionChatMessage(
 				}
 				state.mdRef?.setText(text);
 				if (state.headerRef && state.themeRef) {
-					state.headerRef.setText(buildHeaderText(state.phase, lineCount, state.themeRef));
+					state.tick++;
+					state.headerRef.setText(buildHeaderText(state.phase, lineCount, state.themeRef, state.tick));
 				}
 				state.tuiRef?.requestRender();
 			},

@@ -40,3 +40,9 @@
 ### Patch Changes
 
 - Fix package metadata: pi.description, expanded keywords, corrected repository URL format.
+
+## 0.1.6
+
+### Patch Changes
+
+- Fix header line counter not updating during live streaming. Store theme ref from renderer, call headerRef.setText() on each throttled update.
