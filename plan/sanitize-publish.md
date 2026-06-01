@@ -16,8 +16,18 @@
 
 ### 1. Clean up plan dir
 
-`plan/` has session-specific plans. Remove from repo — they served their
-purpose. Or `.gitignore` them. Decision: delete — git history preserves them.
+`plan/` has session-specific plans (skill development plans, session recap,
+publish plan). Before deleting:
+
+- **Already documented elsewhere:** TUI streaming patterns → `docs/tui-streaming-patterns.md`.
+  Architecture decisions → `AGENTS.md`. Module layout → `src/AGENTS.md`.
+- **Skill plans (#22, #23, #16):** executed and committed to chezmoi. The plans
+  themselves are implementation notes, not reference docs.
+- **Session recap:** architectural flow diagrams are in `docs/tui-streaming-patterns.md`.
+  Commit history preserves the full recap in git.
+
+Decision: delete `plan/` dir. All durable knowledge lives in `docs/`, `AGENTS.md`,
+and git history. Nothing is lost.
 
 ### 2. Update src/AGENTS.md compat shim note
 
@@ -43,13 +53,26 @@ gh repo create victor-software-house/pi-live-compaction \
 
 Private initially — publish as public when ready for npm.
 
-### 5. Create initial changeset + CHANGELOG.md
+### 5. Set up changesets workflow
+
+For the **first release only**, bootstrap manually:
 
 ```bash
 pnpm changeset
-# Select major/minor/patch, write summary
 pnpm changeset version
+# This creates CHANGELOG.md from the changeset
 ```
+
+For **ongoing releases**, add the changesets GitHub Action workflow
+(`.github/workflows/release-please.yml` or similar) that:
+1. Collects changesets from PRs
+2. Opens a "Version Packages" PR automatically
+3. Merging the PR bumps version + updates CHANGELOG.md
+4. Tag push triggers the existing `release.yml` publish workflow
+
+No VSH repo currently uses the changesets PR workflow — this would be the
+first. For v0.1.0 bootstrap, manual changeset is fine. Add the CI workflow
+as a fast follow.
 
 ### 6. Verify all gates
 
