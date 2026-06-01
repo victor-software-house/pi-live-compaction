@@ -58,8 +58,39 @@ All under `~/.local/share/chezmoi/exact_dot_agents/exact_skills/linting-stack/`:
 
 ## Also consider
 
-- `zod` plugin — verify this is actually a built-in oxlint plugin. If not,
-  same fix needed. (Likely built-in via `oxlint-plugin-zod` or similar.)
-- `oxlint-tsgolint` mention — verify this is still current / relevant.
+- ~~`zod` plugin — verify this is actually a built-in oxlint plugin.~~ **CONFIRMED:
+  `zod` is also NOT a built-in oxlint plugin.** It's `eslint-plugin-zod` loaded
+  via `jsPlugins` — same pattern as import-alias. `pi-openai-proxy/.oxlintrc.json`
+  uses: `{ "name": "zod", "specifier": "eslint-plugin-zod" }`. The skill must
+  fix this too — move `zod` from `plugins` → `jsPlugins` in both docs and template.
+- ~~`oxlint-tsgolint` mention — verify this is still current / relevant.~~
+  **CONFIRMED: `oxlint-tsgolint@0.23.0` is current** (MIT, 66 versions,
+  high-perf type-aware TS linter powered by typescript-go). Keep the mention
+  but clarify it's a separate devDependency, not a plugin declaration.
 - The template still lists plugins like `unicorn`, `import`, `promise`, `node`,
-  `oxc` — these are all legit built-in oxlint plugins, no change needed.
+  `oxc` — these are all legit built-in oxlint plugins (confirmed via `--help`
+  CLI flags: `--disable-unicorn-plugin`, `--import-plugin`, etc.), no change needed.
+
+## Updated scope
+
+Both `import-alias` AND `zod` need the same fix — move from `plugins` → `jsPlugins`:
+
+```jsonc
+// BEFORE (wrong — skill template)
+"plugins": ["typescript", "unicorn", "import", "promise", "node", "oxc", "import-alias", "zod"]
+
+// AFTER (correct)
+"plugins": ["typescript", "unicorn", "import", "promise", "node", "oxc"],
+"jsPlugins": [
+  { "name": "@limegrass/import-alias", "specifier": "@limegrass/eslint-plugin-import-alias" },
+  { "name": "zod", "specifier": "eslint-plugin-zod" }
+],
+"rules": {
+  "@limegrass/import-alias/import-alias": "error",
+  "zod/require-strict": "error",
+  "zod/prefer-enum": "warn"
+}
+```
+
+Reference: `~/workspace/victor/pi-ecosystem/pi-openai-proxy/.oxlintrc.json`
+uses this exact pattern for both jsPlugins.
