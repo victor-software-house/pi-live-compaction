@@ -1,5 +1,11 @@
 # pi-live-compaction
 
+## 0.1.3
+
+### Patch Changes
+
+- README restructured with approved visual diagrams (pipeline, preset routing, continuity sections), OG banner frame tightened and content centered, comparison table moved to collapsible section, inspiration corrected.
+
 ## 0.1.2
 
 ### Patch Changes
