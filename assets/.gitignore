@@ -1,0 +1,10 @@
+# Only track final deliverables; everything else is exploration
+# (visual-language repo preserves the important process artifacts)
+*
+!.gitignore
+!logos/
+!logos/brand/
+!logos/brand/**
+!thumbs/
+!thumbs/final/
+!thumbs/final/**

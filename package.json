@@ -31,7 +31,8 @@
 	"pi": {
 		"extensions": [
 			"./dist/index.mjs"
-		]
+		],
+		"image": "https://raw.githubusercontent.com/victor-software-house/pi-live-compaction/main/assets/thumbs/final/pi-live-compaction-og.png"
 	},
 	"scripts": {
 		"check": "tsc --noEmit -p tsconfig.json",

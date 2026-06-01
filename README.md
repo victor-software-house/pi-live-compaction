@@ -1,5 +1,9 @@
 # pi-live-compaction
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/victor-software-house/pi-live-compaction/main/assets/thumbs/final/pi-live-compaction-og.png" alt="pi-live-compaction" width="720" />
+</p>
+
 Live streaming compaction for [Pi](https://github.com/earendil-works/pi-mono) — structured summaries with preset routing, Liquid templates, files-touched manifests, task-state continuity, and a full TUI settings panel.
 
 ## Why
