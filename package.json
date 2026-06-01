@@ -1,6 +1,6 @@
 {
 	"name": "pi-live-compaction",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Live streaming compaction for Pi — structured summaries with preset routing, Liquid templates, files-touched manifests, and a full TUI settings panel.",
 	"author": "Victor Software House",
 	"license": "MIT",
