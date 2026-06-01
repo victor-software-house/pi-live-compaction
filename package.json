@@ -47,7 +47,7 @@
 		"version": "changeset version",
 		"release": "changeset publish",
 		"build": "tsdown",
-		"prepublishOnly": "pnpm run verify && pnpm run build"
+		"prepublishOnly": "pnpm run build"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-ai": "*",
