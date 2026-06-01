@@ -1,5 +1,11 @@
 # pi-live-compaction
 
+## 0.1.2
+
+### Patch Changes
+
+- Use Markdown component for streaming compaction rendering instead of raw Text, add VSH brand mark and gallery image, add README banner with pi.image for pi.dev gallery.
+
 ## 0.1.1
 
 ### Patch Changes
