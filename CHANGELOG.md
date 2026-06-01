@@ -1,5 +1,11 @@
 # pi-live-compaction
 
+## 0.1.4
+
+### Patch Changes
+
+- Documentation refresh: updated README visuals, OG banner, and repo metadata.
+
 ## 0.1.3
 
 ### Patch Changes
