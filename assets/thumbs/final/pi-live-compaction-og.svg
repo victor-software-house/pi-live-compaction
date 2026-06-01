@@ -13,13 +13,13 @@
 
 </defs>
 <rect width="1200" height="630" fill="#10100f"/>
-<rect x="54" y="54" width="1092" height="522" fill="none" stroke="#2e2a21" opacity="1"/>
-<rect x="78" y="78" width="1044" height="474" fill="none" stroke="#d6b16f" opacity="0.45"/>
-<g transform="translate(517,151) scale(0.08003857280617165) translate(44,-183)"><g fill="#ffffff"><use xlink:href="#glyph-0-0" x="27" y="952"/>
+<rect x="36" y="36" width="1128" height="558" fill="none" stroke="#2e2a21" opacity="1"/>
+<rect x="60" y="60" width="1080" height="510" fill="none" stroke="#d6b16f" opacity="0.45"/>
+<g transform="translate(517,138) scale(0.09) translate(44,-183)"><g fill="#ffffff"><use xlink:href="#glyph-0-0" x="27" y="952"/>
 <use xlink:href="#glyph-0-1" x="660" y="952"/>
 <use xlink:href="#glyph-0-2" x="1158" y="952"/></g><circle cx="1912" cy="600" r="58" fill="#f7768e"/></g>
-<text x="600" y="299" fill="#d6b16f" font-family="'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="27" font-weight="700" text-anchor="middle" opacity="1" letter-spacing="1">pi-live-compaction</text>
-<text x="600" y="375" font-family="'Bodoni 72', 'Bodoni 72 Smallcaps', Georgia, serif" font-size="60" text-anchor="middle" xml:space="preserve"><tspan fill="#ffffff" font-weight="500">Context, kept </tspan><tspan fill="#ffffff" font-weight="760">alive</tspan><tspan fill="#ffffff" font-weight="500">.</tspan></text>
-<line x1="435" y1="429" x2="765" y2="429" stroke="#f7768e" stroke-width="2" opacity="0.42"/>
-<text x="600" y="479" fill="#b9b4a4" font-family="'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="19" font-weight="520" text-anchor="middle" opacity="1">transparent summaries, as they happen</text>
+<text x="600" y="296" fill="#d6b16f" font-family="'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="30" font-weight="700" text-anchor="middle" opacity="1" letter-spacing="1">pi-live-compaction</text>
+<text x="600" y="382" font-family="'Bodoni 72', 'Bodoni 72 Smallcaps', Georgia, serif" font-size="68" text-anchor="middle" xml:space="preserve"><tspan fill="#ffffff" font-weight="500">Context, kept </tspan><tspan fill="#ffffff" font-weight="760">alive</tspan><tspan fill="#ffffff" font-weight="500">.</tspan></text>
+<line x1="410" y1="440" x2="790" y2="440" stroke="#f7768e" stroke-width="2" opacity="0.42"/>
+<text x="600" y="496" fill="#b9b4a4" font-family="'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="21" font-weight="520" text-anchor="middle" opacity="1">transparent summaries, as they happen</text>
 </svg>
