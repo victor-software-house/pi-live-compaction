@@ -34,3 +34,9 @@
   preset-routed summarizer models, file-touched manifest extraction, and a full
   TUI settings panel. Includes chat-flow streaming progress via custom message
   renderer pattern.
+
+## 0.1.5
+
+### Patch Changes
+
+- Fix package metadata: pi.description, expanded keywords, corrected repository URL format.
