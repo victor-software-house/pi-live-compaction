@@ -164,8 +164,7 @@ export function registerCompactionChatMessage(
 				if (state.msgObj) {
 					state.msgObj.content = text;
 				}
-				// Markdown component doesn't support setText — trigger rebuild
-				// via requestRender. The renderer reads msgObj.content on rebuild.
+				state.mdRef?.setText(text);
 				state.tuiRef?.requestRender();
 			},
 
