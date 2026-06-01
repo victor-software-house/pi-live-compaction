@@ -21,11 +21,6 @@ Extension entry point: `src/index.ts`. Path alias: `@live-compaction/*` → `src
 | `command/` | `/live-compaction` TUI settings panel |
 | `files-touched/` | File-touch manifest extraction from session history |
 
-## Compat shims (test-facing)
-
-`src/compaction-handler.ts`, `src/files-touched-manifest.ts`, `src/summary-stream.ts` are
-backward-compat re-export stubs kept so existing test imports resolve unchanged.
-
 ## Conventions
 
 - No `../` imports — use `@live-compaction/xxx` path aliases throughout.
