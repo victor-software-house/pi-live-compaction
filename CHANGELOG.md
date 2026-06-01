@@ -1,5 +1,11 @@
 # pi-live-compaction
 
+## 0.1.1
+
+### Patch Changes
+
+- [`21f17b9`](https://github.com/victor-software-house/pi-live-compaction/commit/21f17b9d89f5b9854dc0f7e487f1fbcf70da8c8e) Thanks [@any-victor](https://github.com/any-victor)! - Add tsdown build step for proper npm module resolution. Path aliases now resolve at build time via dist/ output instead of relying on jiti to read tsconfig paths.
+
 ## 0.1.0
 
 ### Initial Release
