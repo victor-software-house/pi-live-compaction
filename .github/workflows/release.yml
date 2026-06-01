@@ -41,6 +41,9 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      - name: Build
+        run: pnpm run build
+
       - name: Pre-publish gates
         run: |
           pnpm run typecheck
@@ -56,3 +59,4 @@ jobs:
           title: 'chore(release): version packages'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
