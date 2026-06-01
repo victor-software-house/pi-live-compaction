@@ -10,9 +10,13 @@
  * 6. Dual mutation (msgObj.content + component refs) + TUI.requestRender()
  */
 
-import type { ExtensionAPI, Theme } from '@earendil-works/pi-coding-agent';
+import {
+	type ExtensionAPI,
+	getMarkdownTheme,
+	type ThemeColor,
+} from '@earendil-works/pi-coding-agent';
 import type { TUI } from '@earendil-works/pi-tui';
-import { Box, Spacer, Text } from '@earendil-works/pi-tui';
+import { Box, Markdown, Spacer, Text } from '@earendil-works/pi-tui';
 
 import type { HookContext, SummaryProgress } from '@live-compaction/types';
 
@@ -27,7 +31,7 @@ const THROTTLE_MS = 150;
 interface ChatState {
 	phase: 'idle' | 'streaming' | 'done';
 	msgObj: { content: unknown } | null;
-	txtRef: InstanceType<typeof Text> | null;
+	mdRef: InstanceType<typeof Markdown> | null;
 	headerRef: InstanceType<typeof Text> | null;
 	tuiRef: TUI | null;
 }
@@ -35,7 +39,7 @@ interface ChatState {
 function buildHeaderText(
 	phase: ChatState['phase'],
 	lineCount: number,
-	theme: Pick<Theme, 'fg'>,
+	theme: { fg: (key: ThemeColor, text: string) => string },
 ): string {
 	const label = phase === 'done' ? 'done' : 'streaming';
 	return (
@@ -59,7 +63,7 @@ export function registerCompactionChatMessage(
 	const state: ChatState = {
 		phase: 'idle',
 		msgObj: null,
-		txtRef: null,
+		mdRef: null,
 		headerRef: null,
 		tuiRef: null,
 	};
@@ -71,18 +75,21 @@ export function registerCompactionChatMessage(
 		const bgFn = (t: string) => theme.bg(bgKey, t);
 		const box = new Box(1, 1, bgFn);
 
-		const lines = String(message.content).split('\n').length;
+		const content = String(message.content);
+		const lines = content.split('\n').length;
 		const header = new Text(buildHeaderText(state.phase, lines, theme), 0, 0);
 		box.addChild(header);
 		state.headerRef = header;
 
 		if (options.expanded) {
 			box.addChild(new Spacer(1));
-			const txt = new Text(theme.fg('muted', String(message.content)), 1, 0);
-			box.addChild(txt);
-			state.txtRef = txt;
+			const md = new Markdown(content, 0, 0, getMarkdownTheme(), {
+				color: (t: string) => theme.fg('customMessageText', t),
+			});
+			box.addChild(md);
+			state.mdRef = md;
 		} else {
-			state.txtRef = null;
+			state.mdRef = null;
 		}
 
 		return box;
@@ -105,7 +112,7 @@ export function registerCompactionChatMessage(
 		// Reset for next compaction cycle
 		state.phase = 'idle';
 		state.msgObj = null;
-		state.txtRef = null;
+		state.mdRef = null;
 		state.headerRef = null;
 	});
 
@@ -157,10 +164,8 @@ export function registerCompactionChatMessage(
 				if (state.msgObj) {
 					state.msgObj.content = text;
 				}
-				// Component refs only exist when expanded (ctrl+o).
-				// Header text is NOT updated here (needs theme ref which the
-				// renderer owns). It rebuilds correctly on expand/collapse.
-				state.txtRef?.setText(text);
+				// Markdown component doesn't support setText — trigger rebuild
+				// via requestRender. The renderer reads msgObj.content on rebuild.
 				state.tuiRef?.requestRender();
 			},
 
