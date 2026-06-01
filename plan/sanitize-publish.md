@@ -14,13 +14,28 @@
 
 ## Steps
 
-### 1. Clean up plan dir
+### 1. Write ADRs for key architectural decisions
+
+Before removing `plan/`, extract decisions into proper ADRs at `docs/adr/`:
+
+| ADR | Decision | Source |
+|-----|----------|--------|
+| `001-chat-flow-streaming.md` | Use `sendMessage` + `registerMessageRenderer` for live compaction display instead of widget-slot or `custom()`. 7-step pattern with dual mutation. | `docs/tui-streaming-patterns.md`, `plan/session-recap.md` |
+| `002-domain-subdirectory-structure.md` | Option A: 8 domain subdirs under `src/` with barrel index.ts, ≤400 LOC per file, AGENTS.md progressive disclosure. | Restructure plan, `plan/session-recap.md` |
+| `003-theme-colors-for-compaction.md` | `toolPendingBg` during streaming, `customMessageBg` when done (matching Pi native), `session_compact` for cleanup. | `AGENTS.md`, `plan/session-recap.md` |
+| `004-strip-only-typescript.md` | No parameter properties, enums, namespaces. `verbatimModuleSyntax` + `isolatedModules`. jiti loads TS directly. | `AGENTS.md` conventions |
+| `005-jsPlugins-not-built-in.md` | `import-alias` and `zod` are external ESLint plugins loaded via oxlint `jsPlugins`, not built-in plugins. | `plan/fix-linting-stack-skill.md` |
+
+ADR format: title, status (accepted), date, context, decision, consequences.
+
+### 2. Clean up plan dir
 
 `plan/` has session-specific plans (skill development plans, session recap,
 publish plan). Before deleting:
 
 - **Already documented elsewhere:** TUI streaming patterns → `docs/tui-streaming-patterns.md`.
-  Architecture decisions → `AGENTS.md`. Module layout → `src/AGENTS.md`.
+  Architecture decisions → `docs/adr/` (created in step 1).
+  Module layout → `src/AGENTS.md`.
 - **Skill plans (#22, #23, #16):** executed and committed to chezmoi. The plans
   themselves are implementation notes, not reference docs.
 - **Session recap:** architectural flow diagrams are in `docs/tui-streaming-patterns.md`.
@@ -29,12 +44,12 @@ publish plan). Before deleting:
 Decision: delete `plan/` dir. All durable knowledge lives in `docs/`, `AGENTS.md`,
 and git history. Nothing is lost.
 
-### 2. Update src/AGENTS.md compat shim note
+### 3. Update src/AGENTS.md compat shim note
 
 `src/AGENTS.md` still mentions compat shims that were deleted. Remove that
 section.
 
-### 3. Verify package contents
+### 4. Verify package contents
 
 ```bash
 pnpm pack --dry-run
@@ -43,7 +58,7 @@ pnpm pack --dry-run
 Ensure only `src/`, `examples/`, `bin/`, `README.md`, `CHANGELOG.md`, `LICENSE`
 are included. No `test/`, `plan/`, `docs/`, `.github/`, config files.
 
-### 4. Create GitHub repo
+### 5. Create GitHub repo
 
 ```bash
 gh repo create victor-software-house/pi-live-compaction \
@@ -53,7 +68,7 @@ gh repo create victor-software-house/pi-live-compaction \
 
 Private initially — publish as public when ready for npm.
 
-### 5. Set up changesets workflow
+### 6. Set up changesets workflow
 
 For the **first release only**, bootstrap manually:
 
@@ -74,20 +89,20 @@ No VSH repo currently uses the changesets PR workflow — this would be the
 first. For v0.1.0 bootstrap, manual changeset is fine. Add the CI workflow
 as a fast follow.
 
-### 6. Verify all gates
+### 7. Verify all gates
 
 ```bash
 pnpm run verify  # typecheck + lint + test
 ```
 
-### 7. Tag + push
+### 8. Tag + push
 
 ```bash
 git tag v0.1.0
 git push --tags
 ```
 
-### 8. Publish to GitHub Packages
+### 9. Publish to GitHub Packages
 
 Release workflow triggers on tag push. Or manual:
 
