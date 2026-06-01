@@ -34,6 +34,7 @@ interface ChatState {
 	mdRef: InstanceType<typeof Markdown> | null;
 	headerRef: InstanceType<typeof Text> | null;
 	tuiRef: TUI | null;
+	themeRef: { fg: (key: ThemeColor, text: string) => string } | null;
 }
 
 function buildHeaderText(
@@ -66,11 +67,13 @@ export function registerCompactionChatMessage(
 		mdRef: null,
 		headerRef: null,
 		tuiRef: null,
+		themeRef: null,
 	};
 
 	// ---- Renderer (function form — required, object form silently breaks) ----
 	pi.registerMessageRenderer(CUSTOM_TYPE, (message, options, theme) => {
 		state.msgObj = message;
+		state.themeRef = theme;
 		const bgKey = state.phase === 'done' ? 'customMessageBg' : 'toolPendingBg';
 		const bgFn = (t: string) => theme.bg(bgKey, t);
 		const box = new Box(1, 1, bgFn);
@@ -114,6 +117,7 @@ export function registerCompactionChatMessage(
 		state.msgObj = null;
 		state.mdRef = null;
 		state.headerRef = null;
+		state.themeRef = null;
 	});
 
 	// ---- Progress factory — shares `state` with renderer above ----
@@ -165,6 +169,9 @@ export function registerCompactionChatMessage(
 					state.msgObj.content = text;
 				}
 				state.mdRef?.setText(text);
+				if (state.headerRef && state.themeRef) {
+					state.headerRef.setText(buildHeaderText(state.phase, lineCount, state.themeRef));
+				}
 				state.tuiRef?.requestRender();
 			},
 
