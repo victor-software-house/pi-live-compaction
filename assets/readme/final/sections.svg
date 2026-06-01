@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 310"><style>text { font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace; }</style>
+<rect width="760" height="310" rx="16" fill="#10100f"/><rect x="12" y="12" width="736" height="286" rx="10" fill="none" stroke="#2e2a21" stroke-width="1"/>
+<text x="380" y="54" fill="#d6b16f" font-size="12" text-anchor="middle" font-weight="700" letter-spacing="3">11 CONTINUITY SECTIONS</text>
+<text x="87" y="90" fill="#f7768e" font-size="10" text-anchor="start" font-weight="700">what happened</text>
+<line x1="87" y1="100" x2="219" y2="100" stroke="#f7768e" stroke-opacity="0.45" stroke-width="1"/>
+<circle cx="97" cy="126" r="3.5" fill="#f7768e"/>
+<text x="119" y="130" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Brief</text>
+<circle cx="97" cy="154" r="3.5" fill="#f7768e"/>
+<text x="119" y="158" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">User intent trail</text>
+<circle cx="97" cy="182" r="3.5" fill="#f7768e"/>
+<text x="119" y="186" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Constraints</text>
+<circle cx="97" cy="210" r="3.5" fill="#f7768e"/>
+<text x="119" y="214" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Errors &amp; dead ends</text>
+<circle cx="97" cy="238" r="3.5" fill="#f7768e"/>
+<text x="119" y="242" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Key decisions</text>
+<text x="297" y="90" fill="#bb9af7" font-size="10" text-anchor="start" font-weight="700">where things stand</text>
+<line x1="297" y1="100" x2="429" y2="100" stroke="#bb9af7" stroke-opacity="0.45" stroke-width="1"/>
+<circle cx="307" cy="126" r="3.5" fill="#bb9af7"/>
+<text x="329" y="130" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Status</text>
+<circle cx="307" cy="154" r="3.5" fill="#bb9af7"/>
+<text x="329" y="158" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Task continuity</text>
+<circle cx="307" cy="182" r="3.5" fill="#bb9af7"/>
+<text x="329" y="186" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Open issues</text>
+<text x="507" y="90" fill="#7aa2f7" font-size="10" text-anchor="start" font-weight="700">what to do next</text>
+<line x1="507" y1="100" x2="639" y2="100" stroke="#7aa2f7" stroke-opacity="0.45" stroke-width="1"/>
+<circle cx="517" cy="126" r="3.5" fill="#7aa2f7"/>
+<text x="539" y="130" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Next steps</text>
+<circle cx="517" cy="154" r="3.5" fill="#7aa2f7"/>
+<text x="539" y="158" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Mandatory reading</text>
+<circle cx="517" cy="182" r="3.5" fill="#7aa2f7"/>
+<text x="539" y="186" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">Files touched</text>
+</svg>
