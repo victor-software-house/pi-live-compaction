@@ -6,7 +6,7 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+ssh://git@github.com/victor-software-house/pi-live-compaction.git"
+		"url": "https://github.com/victor-software-house/pi-live-compaction.git"
 	},
 	"homepage": "https://github.com/victor-software-house/pi-live-compaction#readme",
 	"bugs": {
