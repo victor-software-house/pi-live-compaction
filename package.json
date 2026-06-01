@@ -22,16 +22,15 @@
 	"type": "module",
 	"packageManager": "pnpm@11.5.0",
 	"files": [
-		"src",
+		"dist",
 		"examples",
-		"bin",
 		"README.md",
 		"CHANGELOG.md",
 		"LICENSE"
 	],
 	"pi": {
 		"extensions": [
-			"./src/index.ts"
+			"./dist/index.mjs"
 		]
 	},
 	"scripts": {
@@ -46,7 +45,9 @@
 		"examples:update": "tsx bin/update-examples.ts",
 		"changeset": "changeset",
 		"version": "changeset version",
-		"release": "changeset publish"
+		"release": "changeset publish",
+		"build": "tsdown",
+		"prepublishOnly": "pnpm run verify && pnpm run build"
 	},
 	"peerDependencies": {
 		"@earendil-works/pi-ai": "*",
@@ -80,12 +81,22 @@
 		"@limegrass/eslint-plugin-import-alias": "^1.6.1",
 		"@types/node": "^25.9.1",
 		"oxlint": "^1.67.0",
+		"publint": "^0.3.21",
+		"tsdown": "^0.22.1",
 		"tsx": "^4.22.3",
 		"typescript": "^6.0.3",
+		"unplugin-unused": "^0.5.7",
 		"vitest": "^4.1.7"
 	},
 	"publishConfig": {
 		"access": "public",
 		"registry": "https://registry.npmjs.org"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.mts",
+			"default": "./dist/index.mjs"
+		},
+		"./package.json": "./package.json"
 	}
 }
