@@ -1,22 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 270"><style>text { font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace; }</style>
-<rect width="740" height="270" rx="16" fill="#10100f"/><rect x="12" y="12" width="716" height="246" rx="10" fill="none" stroke="#2e2a21" stroke-width="1"/>
-<text x="370" y="44" fill="#d6b16f" font-size="12" text-anchor="middle" font-weight="700" letter-spacing="3">PRESET ROUTING</text>
-<text x="370" y="82" text-anchor="middle" font-size="14" xml:space="preserve"><tspan fill="#6f6a5e" font-weight="500">$ </tspan><tspan fill="#b9b4a4" font-weight="700">/compact</tspan><tspan fill="#6f6a5e" font-weight="500"> --preset </tspan><tspan fill="#f7768e" font-weight="700">deep</tspan></text>
-<line x1="446" y1="98" x2="446" y2="124" stroke="#f7768e" stroke-opacity="0.86" stroke-width="1.25"/><path d="M 446 124 l -4 -6 h 8 z" fill="#f7768e" fill-opacity="0.86"/>
-<rect x="82" y="132" width="120" height="56" rx="7" fill="#10100f" stroke="#d6b16f" stroke-opacity="0.45" stroke-width="1.25"/>
-<text x="142" y="155" fill="#b9b4a4" font-size="14" text-anchor="middle" font-weight="700">cheap</text>
-<text x="142" y="175" fill="#6f6a5e" font-size="9" text-anchor="middle" font-weight="500">haiku · low</text>
-<rect x="234" y="132" width="120" height="56" rx="7" fill="#10100f" stroke="#d6b16f" stroke-opacity="0.45" stroke-width="1.25"/>
-<text x="294" y="155" fill="#b9b4a4" font-size="14" text-anchor="middle" font-weight="700">default</text>
-<text x="294" y="175" fill="#6f6a5e" font-size="9" text-anchor="middle" font-weight="500">sonnet · med</text>
-<rect x="386" y="132" width="120" height="56" rx="7" fill="#10100f" stroke="#f7768e" stroke-opacity="0.96" stroke-width="1.7"/>
-<text x="446" y="155" fill="#ffffff" font-size="14" text-anchor="middle" font-weight="700">deep</text>
-<text x="446" y="175" fill="#6f6a5e" font-size="9" text-anchor="middle" font-weight="500">sonnet · high</text>
-<rect x="538" y="132" width="120" height="56" rx="7" fill="#10100f" stroke="#d6b16f" stroke-opacity="0.45" stroke-width="1.25"/>
-<text x="598" y="155" fill="#b9b4a4" font-size="14" text-anchor="middle" font-weight="700">thorough</text>
-<text x="598" y="175" fill="#6f6a5e" font-size="9" text-anchor="middle" font-weight="500">opus · xhigh</text>
-<circle cx="414" cy="206" r="3.5" fill="#f7768e"/>
-<text x="428" y="210" fill="#f7768e" font-size="10" text-anchor="start" font-weight="600">active</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 270"><style>text { font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, monospace; }</style>
+<rect width="960" height="270" rx="16" fill="#10100f"/><rect x="6" y="6" width="948" height="258" rx="10" fill="none" stroke="#2e2a21" stroke-width="1"/>
+<text x="480" y="44" fill="#d6b16f" font-size="12" text-anchor="middle" font-weight="700" letter-spacing="3">PRESET ROUTING</text>
+<text x="480" y="82" text-anchor="middle" font-size="14" xml:space="preserve"><tspan fill="#6f6a5e" font-weight="500">$ </tspan><tspan fill="#b9b4a4" font-weight="700">/compact</tspan><tspan fill="#6f6a5e" font-weight="500"> --preset </tspan><tspan fill="#f7768e" font-weight="700">deep</tspan></text>
+<line x1="556" y1="98" x2="556" y2="124" stroke="#f7768e" stroke-opacity="0.86" stroke-width="1.25"/><path d="M 556 124 l -4 -6 h 8 z" fill="#f7768e" fill-opacity="0.86"/>
+<rect x="192" y="132" width="120" height="56" rx="7" fill="#10100f" stroke="#d6b16f" stroke-opacity="0.45" stroke-width="1.25"/>
+<text x="252" y="155" fill="#b9b4a4" font-size="14" text-anchor="middle" font-weight="700">cheap</text>
+<text x="252" y="175" fill="#6f6a5e" font-size="9" text-anchor="middle" font-weight="500">haiku · low</text>
+<rect x="344" y="132" width="120" height="56" rx="7" fill="#10100f" stroke="#d6b16f" stroke-opacity="0.45" stroke-width="1.25"/>
+<text x="404" y="155" fill="#b9b4a4" font-size="14" text-anchor="middle" font-weight="700">default</text>
+<text x="404" y="175" fill="#6f6a5e" font-size="9" text-anchor="middle" font-weight="500">sonnet · med</text>
+<rect x="496" y="132" width="120" height="56" rx="7" fill="#10100f" stroke="#f7768e" stroke-opacity="0.96" stroke-width="1.7"/>
+<text x="556" y="155" fill="#ffffff" font-size="14" text-anchor="middle" font-weight="700">deep</text>
+<text x="556" y="175" fill="#6f6a5e" font-size="9" text-anchor="middle" font-weight="500">sonnet · high</text>
+<rect x="648" y="132" width="120" height="56" rx="7" fill="#10100f" stroke="#d6b16f" stroke-opacity="0.45" stroke-width="1.25"/>
+<text x="708" y="155" fill="#b9b4a4" font-size="14" text-anchor="middle" font-weight="700">thorough</text>
+<text x="708" y="175" fill="#6f6a5e" font-size="9" text-anchor="middle" font-weight="500">opus · xhigh</text>
+<circle cx="524" cy="206" r="3.5" fill="#f7768e"/>
+<text x="538" y="210" fill="#f7768e" font-size="10" text-anchor="start" font-weight="600">active</text>
 <text x="86" y="234" fill="#6f6a5e" font-size="11" text-anchor="start" font-weight="500">fallback:</text>
 <text x="168" y="234" fill="#b9b4a4" font-size="11" text-anchor="start" font-weight="500">deep → cheap → session model</text>
 </svg>

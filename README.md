@@ -29,9 +29,7 @@ pi -e npm:pi-live-compaction
 
 ## How it works
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/victor-software-house/pi-live-compaction/main/assets/readme/final/pipeline.png" alt="Compaction pipeline" width="720" />
-</p>
+<img src="https://raw.githubusercontent.com/victor-software-house/pi-live-compaction/main/assets/readme/final/pipeline.png" alt="Compaction pipeline" />
 
 The extension hooks into Pi's `session:beforeCompact` and `session:beforeTree` events:
 
@@ -43,17 +41,13 @@ The extension hooks into Pi's `session:beforeCompact` and `session:beforeTree` e
 
 ### What the summary preserves
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/victor-software-house/pi-live-compaction/main/assets/readme/final/sections.png" alt="11 continuity sections" width="540" />
-</p>
+<img src="https://raw.githubusercontent.com/victor-software-house/pi-live-compaction/main/assets/readme/final/sections.png" alt="11 continuity sections" />
 
 Every compaction summary captures what happened, where things stand, and what to do next — so the next agent (or the same session after compaction) opens the right files and doesn't repeat failed approaches.
 
 ### Preset routing
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/victor-software-house/pi-live-compaction/main/assets/readme/final/presets.png" alt="Preset routing" width="540" />
-</p>
+<img src="https://raw.githubusercontent.com/victor-software-house/pi-live-compaction/main/assets/readme/final/presets.png" alt="Preset routing" />
 
 Route compaction to different models with different thinking levels. Use `/compact --preset deep` for thorough compaction or let the default kick in automatically. If the selected preset's model auth fails, the fallback chain tries cheaper models before falling back to the session model.
 
