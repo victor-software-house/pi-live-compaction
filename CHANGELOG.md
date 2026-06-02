@@ -46,3 +46,11 @@
 ### Patch Changes
 
 - Fix header line counter not updating during live streaming. Store theme ref from renderer, call headerRef.setText() on each throttled update.
+
+## 0.1.6
+
+### Patch Changes
+
+- Fix stale ctx crash when reload or session switch fires mid-compaction. safeUI() wraps ctx.ui calls so streaming completes gracefully.
+- Fix header line counter not updating during live streaming.
+- Fix live streaming updates using Markdown.setText().
