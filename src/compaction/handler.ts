@@ -39,6 +39,7 @@ import type {
 	ResolvedSummarizer,
 	RunDeps,
 } from '@live-compaction/types';
+import { safeUI } from '@live-compaction/types';
 
 export const DEFAULT_DEPS: RunDeps = {
 	complete: completeSimple,
@@ -70,12 +71,13 @@ export async function runLiveCompaction(
 	| { cancel: true }
 	| undefined
 > {
+	const safeCtx: HookContext = { ...ctx, ui: safeUI(ctx) };
 	try {
-		const config = await deps.loadConfig(ctx.cwd);
-		const promptContract = await deps.loadCompactionPrompt(ctx.cwd);
+		const config = await deps.loadConfig(safeCtx.cwd);
+		const promptContract = await deps.loadCompactionPrompt(safeCtx.cwd);
 		const parsedInstructions = parseCompactInstructions(event.customInstructions);
 
-		const paths = deps.resolvePaths(ctx.cwd);
+		const paths = deps.resolvePaths(safeCtx.cwd);
 		const attemptId = randomUUID();
 		const attemptMetadata = {
 			focusInput: event.customInstructions,
@@ -98,15 +100,15 @@ export async function runLiveCompaction(
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
 			notify(
-				ctx,
+				safeCtx,
 				`Failed to load compaction template ${templatePath}: ${message}. Falling back to default block layout.`,
 				'warning',
 			);
 			template = null;
 		}
 		const notifyHook = (message: string, level: Parameters<typeof notify>[2]) =>
-			notify(ctx, message, level);
-		const progress = deps.makeProgress?.(ctx) ?? makeSummaryProgress(ctx);
+			notify(safeCtx, message, level);
+		const progress = deps.makeProgress?.(safeCtx) ?? makeSummaryProgress(safeCtx);
 
 		if (template?.frontmatter.preset && !parsedInstructions.usesPresetDirective) {
 			parsedInstructions.usesPresetDirective = true;
@@ -119,8 +121,9 @@ export async function runLiveCompaction(
 		}
 
 		const filesTouchedBlock = config.includeFilesTouched.inCompactionSummary
-			? renderFilesTouchedManifestBlock(deps.collectFilesTouched(event.branchEntries, ctx.cwd)) ||
-				undefined
+			? renderFilesTouchedManifestBlock(
+					deps.collectFilesTouched(event.branchEntries, safeCtx.cwd),
+				) || undefined
 			: undefined;
 
 		const taskStateBlock = boundTaskStateBlock(await deps.fetchTaskState?.());
@@ -132,8 +135,8 @@ export async function runLiveCompaction(
 			try {
 				const summarizer: ResolvedSummarizer =
 					parsedInstructions.presetQuery === CURRENT_PRESET_SENTINEL
-						? await resolveDefaultSummarizer(ctx, event.branchEntries)
-						: await resolvePresetSummarizer(ctx, config, parsedInstructions.presetQuery);
+						? await resolveDefaultSummarizer(safeCtx, event.branchEntries)
+						: await resolvePresetSummarizer(safeCtx, config, parsedInstructions.presetQuery);
 				const summary = await summarizeWithResolvedModel(
 					{
 						event,
@@ -168,7 +171,7 @@ export async function runLiveCompaction(
 					error: error instanceof Error ? error.message : String(error),
 				});
 				notify(
-					ctx,
+					safeCtx,
 					`Preset compaction failed (${describePresetFallback(error)}). Falling back to ${describeConfiguredFallback(config)}.`,
 					'warning',
 				);
@@ -176,7 +179,7 @@ export async function runLiveCompaction(
 			}
 		} else if (parsedInstructions.usesPresetDirective) {
 			notify(
-				ctx,
+				safeCtx,
 				`Malformed preset directive. Falling back to ${describeConfiguredFallback(config)}.`,
 				'warning',
 			);
@@ -189,29 +192,29 @@ export async function runLiveCompaction(
 
 			if (skipDefaultPreset) {
 				summarizer = await resolveConfiguredFallbackSummarizer(
-					ctx,
+					safeCtx,
 					effectiveConfig,
 					event.branchEntries,
 					parsedInstructions.presetQuery,
 				);
 			} else if (effectiveConfig.defaultPreset === CURRENT_PRESET_SENTINEL) {
-				summarizer = await resolveDefaultSummarizer(ctx, event.branchEntries);
+				summarizer = await resolveDefaultSummarizer(safeCtx, event.branchEntries);
 			} else {
 				try {
 					summarizer = await resolvePresetSummarizer(
-						ctx,
+						safeCtx,
 						effectiveConfig,
 						effectiveConfig.defaultPreset,
 					);
 				} catch (error) {
 					if (isAbortError(error)) return { cancel: true };
 					notify(
-						ctx,
+						safeCtx,
 						`Default preset '${effectiveConfig.defaultPreset}' failed (${describePresetFallback(error)}). Falling back to ${describeConfiguredFallback(effectiveConfig)}.`,
 						'warning',
 					);
 					summarizer = await resolveConfiguredFallbackSummarizer(
-						ctx,
+						safeCtx,
 						effectiveConfig,
 						event.branchEntries,
 						effectiveConfig.defaultPreset,
@@ -254,13 +257,13 @@ export async function runLiveCompaction(
 				event: 'failed',
 				error: message,
 			});
-			notify(ctx, `Grounded compaction failed: ${message}`, 'warning');
+			notify(safeCtx, `Grounded compaction failed: ${message}`, 'warning');
 			return parsedInstructions.usesPresetDirective ? { cancel: true } : undefined;
 		}
 	} catch (error) {
 		if (isAbortError(error) || event.signal.aborted) return { cancel: true };
 		const message = error instanceof Error ? error.message : String(error);
-		notify(ctx, `Grounded compaction failed: ${message}`, 'warning');
+		notify(safeCtx, `Grounded compaction failed: ${message}`, 'warning');
 		const parsedInstructions = parseCompactInstructions(event.customInstructions);
 		return parsedInstructions.usesPresetDirective ? { cancel: true } : undefined;
 	}

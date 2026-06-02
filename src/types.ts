@@ -21,6 +21,28 @@ import type { collectFilesTouched } from '@live-compaction/files-touched';
 import type { loadCompactionTemplate } from '@live-compaction/template';
 
 export type NotifyLevel = 'info' | 'warning' | 'error';
+
+/**
+ * Wrap a HookContext's UI so calls silently no-op if ctx goes stale
+ * after a reload or session replacement mid-compaction.
+ */
+export function safeUI(ctx: HookContext): HookContext['ui'] {
+	const wrap = <T extends (...args: never[]) => unknown>(fn: T): T =>
+		((...args: Parameters<T>) => {
+			try {
+				return fn(...args);
+			} catch {
+				// ctx stale after reload/session replacement — swallow
+			}
+		}) as T;
+	return {
+		notify: wrap(ctx.ui.notify),
+		setStatus: wrap(ctx.ui.setStatus),
+		setWidget: wrap(ctx.ui.setWidget),
+		setWorkingMessage: wrap(ctx.ui.setWorkingMessage),
+	};
+}
+
 export type ReasoningLevel = Exclude<ThinkingLevel, 'off'>;
 export type PreparedMessages = Parameters<typeof convertToLlm>[0];
 export type StreamSimple = (

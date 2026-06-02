@@ -7,6 +7,7 @@ import {
 
 import { normalizeOptionalText } from '@live-compaction/config';
 import type { HookContext, NotifyLevel, SummaryProgress } from '@live-compaction/types';
+import { safeUI } from '@live-compaction/types';
 
 const TASK_STATE_MAX_CHARS = 6000;
 
@@ -52,13 +53,14 @@ export function makeSummaryProgress(ctx: HookContext): SummaryProgress | undefin
 	if (!ctx.hasUI) return undefined;
 	if (!ctx.ui.setStatus && !ctx.ui.setWidget && !ctx.ui.setWorkingMessage) return undefined;
 
+	const ui = safeUI(ctx);
 	const key = 'live-compaction';
 	let lastUpdate = 0;
 	let started = false;
 	let tokensBefore = 0;
 
 	const setCompactionWidget = (summary: string) => {
-		ctx.ui.setWidget?.(
+		ui.setWidget?.(
 			key,
 			() => {
 				const component = new CompactionSummaryMessageComponent({
@@ -75,17 +77,17 @@ export function makeSummaryProgress(ctx: HookContext): SummaryProgress | undefin
 	};
 
 	const clear = () => {
-		ctx.ui.setStatus?.(key, undefined);
-		ctx.ui.setWidget?.(key, undefined);
-		ctx.ui.setWorkingMessage?.();
+		ui.setStatus?.(key, undefined);
+		ui.setWidget?.(key, undefined);
+		ui.setWorkingMessage?.();
 	};
 
 	return {
 		start(modelLabel: string, compactedTokensBefore: number) {
 			started = true;
 			tokensBefore = compactedTokensBefore;
-			ctx.ui.setStatus?.(key, `compacting with ${modelLabel}`);
-			ctx.ui.setWorkingMessage?.(`Compacting with ${modelLabel}…`);
+			ui.setStatus?.(key, `compacting with ${modelLabel}`);
+			ui.setWorkingMessage?.(`Compacting with ${modelLabel}…`);
 			setCompactionWidget('');
 		},
 		update(text: string) {
@@ -94,18 +96,18 @@ export function makeSummaryProgress(ctx: HookContext): SummaryProgress | undefin
 			if (now - lastUpdate < 150) return;
 			lastUpdate = now;
 			const lineCount = text ? text.split('\n').length : 0;
-			ctx.ui.setStatus?.(key, `compacting · ${lineCount} lines`);
+			ui.setStatus?.(key, `compacting · ${lineCount} lines`);
 			setCompactionWidget(text);
 		},
 		finish() {
 			clear();
 		},
 		fail(message: string) {
-			ctx.ui.setStatus?.(key, `compaction failed: ${message}`);
-			ctx.ui.setWidget?.(key, [`Grounded compaction failed: ${message}`], {
+			ui.setStatus?.(key, `compaction failed: ${message}`);
+			ui.setWidget?.(key, [`Grounded compaction failed: ${message}`], {
 				placement: 'aboveEditor',
 			});
-			ctx.ui.setWorkingMessage?.();
+			ui.setWorkingMessage?.();
 		},
 	};
 }

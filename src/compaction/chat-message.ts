@@ -19,6 +19,7 @@ import type { TUI } from '@earendil-works/pi-tui';
 import { Box, Markdown, Spacer, Text } from '@earendil-works/pi-tui';
 
 import type { HookContext, SummaryProgress } from '@live-compaction/types';
+import { safeUI } from '@live-compaction/types';
 
 const CUSTOM_TYPE = 'live-compaction-stream';
 const THROTTLE_MS = 150;
@@ -124,12 +125,13 @@ export function registerCompactionChatMessage(
 	return function makeChatSummaryProgress(ctx: HookContext): SummaryProgress | undefined {
 		if (!ctx.hasUI) return undefined;
 
+		const ui = safeUI(ctx);
 		let lastUpdate = 0;
 		let started = false;
 
 		// Capture TUI ref (documented: tui.md Pattern 6)
 		const captureTui = () => {
-			ctx.ui.setWidget?.(
+			ui.setWidget?.(
 				'_tui-cap',
 				(tui) => {
 					state.tuiRef = tui as TUI;
@@ -137,7 +139,7 @@ export function registerCompactionChatMessage(
 				},
 				{ placement: 'belowEditor' },
 			);
-			setTimeout(() => ctx.ui.setWidget?.('_tui-cap', undefined), 100);
+			setTimeout(() => ui.setWidget?.('_tui-cap', undefined), 100);
 		};
 
 		return {
@@ -145,7 +147,7 @@ export function registerCompactionChatMessage(
 				started = true;
 				state.phase = 'streaming';
 				captureTui();
-				ctx.ui.setWorkingMessage?.(`Compacting with ${modelLabel}…`);
+				ui.setWorkingMessage?.(`Compacting with ${modelLabel}…`);
 
 				// Render initial message in chat
 				pi.sendMessage({
@@ -162,7 +164,7 @@ export function registerCompactionChatMessage(
 				lastUpdate = now;
 
 				const lineCount = text ? text.split('\n').length : 0;
-				ctx.ui.setWorkingMessage?.(`Compacting · ${lineCount} lines`);
+				ui.setWorkingMessage?.(`Compacting · ${lineCount} lines`);
 
 				// Dual mutation — rebuild-safe + immediate visual
 				if (state.msgObj) {
@@ -178,7 +180,7 @@ export function registerCompactionChatMessage(
 			finish() {
 				started = false;
 				state.phase = 'done';
-				ctx.ui.setWorkingMessage?.();
+				ui.setWorkingMessage?.();
 				// Trigger rebuild to apply customMessageBg
 				state.tuiRef?.requestRender();
 			},
@@ -186,8 +188,8 @@ export function registerCompactionChatMessage(
 			fail(message: string) {
 				started = false;
 				state.phase = 'idle';
-				ctx.ui.setWorkingMessage?.();
-				ctx.ui.setWidget?.('live-compaction-error', [`Compaction failed: ${message}`], {
+				ui.setWorkingMessage?.();
+				ui.setWidget?.('live-compaction-error', [`Compaction failed: ${message}`], {
 					placement: 'aboveEditor',
 				});
 			},
