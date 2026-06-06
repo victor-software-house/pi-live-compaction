@@ -11,6 +11,19 @@
  */
 
 import {
+	closeSync,
+	fchmodSync,
+	fsyncSync,
+	openSync,
+	readFileSync,
+	renameSync,
+	rmSync,
+	statSync,
+	writeFileSync,
+} from 'node:fs';
+import path from 'node:path';
+
+import {
 	type ExtensionAPI,
 	getMarkdownTheme,
 	type ThemeColor,
@@ -23,6 +36,7 @@ import { safeUI } from '@live-compaction/types';
 
 const CUSTOM_TYPE = 'live-compaction-stream';
 const THROTTLE_MS = 150;
+let rewriteCounter = 0;
 
 /**
  * Shared mutable state between the registered renderer and the progress
@@ -49,6 +63,160 @@ function buildHeaderText(
 		' ' +
 		theme.fg('muted', `${lineCount} lines`)
 	);
+}
+
+interface MutableCustomMessageEntry extends Record<string, unknown> {
+	type: 'custom_message';
+	customType: string;
+	display: unknown;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === 'object' && value !== null;
+}
+
+function isLiveCompactionStreamEntry(entry: unknown): entry is MutableCustomMessageEntry {
+	return (
+		isRecord(entry) &&
+		entry.type === 'custom_message' &&
+		entry.customType === CUSTOM_TYPE &&
+		entry.display !== false
+	);
+}
+
+function serializeSessionFile(header: unknown, entries: readonly unknown[]): string {
+	return `${[header, ...entries].map((entry) => JSON.stringify(entry)).join('\n')}\n`;
+}
+
+function createTempPath(sessionFile: string, suffix: string): string {
+	rewriteCounter += 1;
+	return path.join(
+		path.dirname(sessionFile),
+		`.${path.basename(sessionFile)}.live-compaction-${process.pid}-${rewriteCounter}-${suffix}.tmp`,
+	);
+}
+
+function writeReplacementFile(
+	sessionFile: string,
+	content: string,
+	mode: number,
+	expectedCurrentContent?: string,
+): void {
+	const tempPath = createTempPath(sessionFile, 'rewrite');
+	let fd: number | undefined;
+	try {
+		fd = openSync(tempPath, 'wx');
+		fchmodSync(fd, mode);
+		writeFileSync(fd, content, 'utf8');
+		fsyncSync(fd);
+		closeSync(fd);
+		fd = undefined;
+
+		if (expectedCurrentContent !== undefined) {
+			const currentContent = readFileSync(sessionFile, 'utf8');
+			if (currentContent !== expectedCurrentContent) {
+				throw new Error('Session file changed while finalizing live compaction stream entry');
+			}
+		}
+
+		renameSync(tempPath, sessionFile);
+	} finally {
+		if (fd !== undefined) closeSync(fd);
+		rmSync(tempPath, { force: true });
+	}
+}
+
+function restoreOriginalSessionFile(
+	sessionFile: string,
+	originalContent: string,
+	mode: number,
+): void {
+	writeReplacementFile(sessionFile, originalContent, mode);
+}
+
+function finalizeStreamEntries(ctx: HookContext): void {
+	const ui = safeUI(ctx);
+	const sessionManager = ctx.sessionManager;
+	if (!sessionManager) {
+		ui.notify?.(
+			'Live compaction stream finalization skipped: session manager is unavailable.',
+			'warning',
+		);
+		return;
+	}
+
+	const sessionFile = sessionManager.getSessionFile();
+	const header = sessionManager.getHeader();
+	if (!sessionFile || !header) {
+		ui.notify?.(
+			'Live compaction stream finalization skipped: session file is unavailable.',
+			'warning',
+		);
+		return;
+	}
+
+	const entries = sessionManager.getEntries();
+	const targets = entries.filter(isLiveCompactionStreamEntry);
+	if (targets.length === 0) {
+		ui.notify?.(
+			'Live compaction stream finalization skipped: no stream message entries found.',
+			'info',
+		);
+		return;
+	}
+
+	const originalDisplays = targets.map((entry) => ({ entry, display: entry.display }));
+	const mode = statSync(sessionFile).mode & 0o777;
+	const originalContent = readFileSync(sessionFile, 'utf8');
+	const liveOriginalContent = serializeSessionFile(header, entries);
+
+	try {
+		if (liveOriginalContent !== originalContent) {
+			throw new Error('Live session entries do not match the persisted session file');
+		}
+
+		for (const entry of targets) {
+			entry.display = false;
+		}
+
+		const nextContent = serializeSessionFile(header, entries);
+		writeReplacementFile(sessionFile, nextContent, mode, originalContent);
+
+		const persistedContent = readFileSync(sessionFile, 'utf8');
+		if (persistedContent !== nextContent) {
+			restoreOriginalSessionFile(sessionFile, originalContent, mode);
+			throw new Error('Session file verification failed after live compaction finalization');
+		}
+
+		ui.notify?.(
+			`Live compaction stream finalized: ${targets.length} transient message${targets.length === 1 ? '' : 's'} hidden from resume.`,
+			'info',
+		);
+	} catch (error) {
+		for (const original of originalDisplays) {
+			original.entry.display = original.display;
+		}
+
+		try {
+			if (readFileSync(sessionFile, 'utf8') !== originalContent) {
+				restoreOriginalSessionFile(sessionFile, originalContent, mode);
+			}
+		} catch (rollbackError) {
+			const message =
+				rollbackError instanceof Error ? rollbackError.message : String(rollbackError);
+			ui.notify?.(
+				`Live compaction stream finalization failed and rollback failed: ${message}`,
+				'error',
+			);
+			return;
+		}
+
+		const message = error instanceof Error ? error.message : String(error);
+		ui.notify?.(
+			`Live compaction stream finalization failed; original session JSONL restored: ${message}`,
+			'error',
+		);
+	}
 }
 
 /**
@@ -108,10 +276,7 @@ export function registerCompactionChatMessage(
 
 	// ---- Hide on compaction commit (fires before rebuildChatFromMessages) ----
 	pi.on('session_compact', (_event, ctx) => {
-		const entry = ctx.sessionManager
-			.getEntries()
-			.findLast((e) => e.type === 'custom_message' && e.customType === CUSTOM_TYPE);
-		if (entry) (entry as { display: unknown }).display = undefined;
+		finalizeStreamEntries(ctx);
 
 		// Reset for next compaction cycle
 		state.phase = 'idle';

@@ -22,6 +22,12 @@ import type { loadCompactionTemplate } from '@live-compaction/template';
 
 export type NotifyLevel = 'info' | 'warning' | 'error';
 
+export type HookSessionManager = {
+	getSessionFile(): string | undefined;
+	getHeader(): unknown;
+	getEntries(): unknown[];
+};
+
 /**
  * Wrap a HookContext's UI so calls silently no-op if ctx goes stale
  * after a reload or session replacement mid-compaction.
@@ -84,6 +90,7 @@ export interface PresetMatchResult {
 export type HookContext = {
 	hasUI: boolean;
 	ui: Pick<ExtensionUIContext, 'notify' | 'setStatus' | 'setWidget' | 'setWorkingMessage'>;
+	sessionManager?: HookSessionManager;
 	model?: Model<Api>;
 	cwd?: string | null;
 	modelRegistry: {
