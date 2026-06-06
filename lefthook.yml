@@ -17,5 +17,7 @@ commit-msg:
 pre-push:
   parallel: true
   commands:
+    lockfile:
+      run: pnpm install --lockfile-only --frozen-lockfile
     verify:
       run: mise run verify
