@@ -1,5 +1,11 @@
 # pi-live-compaction
 
+## 0.1.7
+
+### Patch Changes
+
+- [`2948f15`](https://github.com/victor-software-house/pi-live-compaction/commit/2948f1529fde3ba659a46aa800e9076dce46063b) Thanks [@any-victor](https://github.com/any-victor)! - Render the live compaction stream as a volatile in-memory message so it disappears after Pi's native compaction rebuild without persisting a stream row, and patch the live Pi runtime rather than any package-local Pi copy.
+
 ## 0.1.4
 
 ### Patch Changes
