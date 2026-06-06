@@ -58,9 +58,9 @@ export {
 // Extension entry point
 // ---------------------------------------------------------------------------
 
-export default function liveCompactionExtension(pi: ExtensionAPI): void {
+export default async function liveCompactionExtension(pi: ExtensionAPI): Promise<void> {
 	registerLiveCompactionCommand(pi);
-	const makeChatProgress = registerCompactionChatMessage(pi);
+	const makeChatProgress = await registerCompactionChatMessage(pi);
 
 	pi.on('session_before_compact', async (event, ctx) => {
 		return runLiveCompaction(event, ctx, {

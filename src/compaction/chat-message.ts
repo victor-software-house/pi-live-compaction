@@ -61,10 +61,10 @@ function buildHeaderText(
  * Returns a factory that creates a chat-flow {@link SummaryProgress} for each
  * compaction run — sharing renderer state via closure.
  */
-export function registerCompactionChatMessage(
+export async function registerCompactionChatMessage(
 	pi: ExtensionAPI,
-): (ctx: HookContext) => SummaryProgress | undefined {
-	installVolatileCompactionMessagePatch();
+): Promise<(ctx: HookContext) => SummaryProgress | undefined> {
+	await installVolatileCompactionMessagePatch();
 
 	const state: ChatState = {
 		phase: 'idle',

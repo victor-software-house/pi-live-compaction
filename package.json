@@ -64,13 +64,13 @@
 	},
 	"peerDependenciesMeta": {
 		"@earendil-works/pi-ai": {
-			"optional": false
+			"optional": true
 		},
 		"@earendil-works/pi-coding-agent": {
-			"optional": false
+			"optional": true
 		},
 		"@earendil-works/pi-tui": {
-			"optional": false
+			"optional": true
 		}
 	},
 	"dependencies": {

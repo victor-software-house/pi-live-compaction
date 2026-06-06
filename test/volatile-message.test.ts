@@ -1,9 +1,8 @@
-import { AgentSession } from '@earendil-works/pi-coding-agent';
 import {
-	installVolatileCompactionMessagePatch,
+	installVolatileCompactionMessagePatchFromRuntime,
 	LIVE_COMPACTION_STREAM_CUSTOM_TYPE,
 } from '@live-compaction/compaction/volatile-message';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const PATCH_FLAG = Symbol.for('pi-live-compaction.volatile-message-patch');
 
@@ -24,28 +23,24 @@ type PatchablePrototype = {
 	sendCustomMessage?: SendCustomMessage;
 } & Record<symbol, unknown>;
 
-const prototype = AgentSession.prototype as unknown as PatchablePrototype;
-const nativeSendCustomMessage = prototype.sendCustomMessage;
-const nativePatchFlag = prototype[PATCH_FLAG];
+function makeRuntime(nativeSend: SendCustomMessage): {
+	prototype: PatchablePrototype;
+	runtime: { AgentSession: { prototype: PatchablePrototype } };
+} {
+	const prototype: PatchablePrototype = {
+		sendCustomMessage: nativeSend,
+	};
+	return { prototype, runtime: { AgentSession: { prototype } } };
+}
 
-afterEach(() => {
-	prototype.sendCustomMessage = nativeSendCustomMessage;
-	if (nativePatchFlag === undefined) {
-		delete prototype[PATCH_FLAG];
-	} else {
-		prototype[PATCH_FLAG] = nativePatchFlag;
-	}
-});
-
-describe('installVolatileCompactionMessagePatch', () => {
+describe('installVolatileCompactionMessagePatchFromRuntime', () => {
 	it('emits live compaction stream messages without calling native persistence path', async () => {
 		const nativeCalls: unknown[] = [];
-		prototype.sendCustomMessage = vi.fn(async function nativeSend(message: unknown) {
+		const { prototype, runtime } = makeRuntime(async function nativeSend(message: unknown) {
 			nativeCalls.push(message);
 		});
-		delete prototype[PATCH_FLAG];
 
-		installVolatileCompactionMessagePatch();
+		installVolatileCompactionMessagePatchFromRuntime(runtime);
 
 		const emit = vi.fn();
 		const session = Object.create(prototype) as {
@@ -61,6 +56,7 @@ describe('installVolatileCompactionMessagePatch', () => {
 		});
 
 		expect(nativeCalls).toEqual([]);
+		expect(prototype[PATCH_FLAG]).toBe(true);
 		expect(emit).toHaveBeenCalledTimes(2);
 		expect(emit).toHaveBeenNthCalledWith(1, {
 			type: 'message_start',
@@ -82,10 +78,9 @@ describe('installVolatileCompactionMessagePatch', () => {
 
 	it('delegates unrelated custom messages to the native send path', async () => {
 		const nativeSend = vi.fn(async () => undefined);
-		prototype.sendCustomMessage = nativeSend;
-		delete prototype[PATCH_FLAG];
+		const { prototype, runtime } = makeRuntime(nativeSend);
 
-		installVolatileCompactionMessagePatch();
+		installVolatileCompactionMessagePatchFromRuntime(runtime);
 
 		const session = Object.create(prototype) as {
 			sendCustomMessage: SendCustomMessage;
