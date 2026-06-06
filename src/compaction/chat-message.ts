@@ -5,9 +5,8 @@
  * 1. Capture TUI ref from widget factory
  * 2. Register custom message renderer (toolPendingBg → customMessageBg)
  * 3. Filter from LLM context via pi.on('context')
- * 4. Hide on compaction via pi.on('session_compact')
- * 5. Send message (renders in chat)
- * 6. Dual mutation (msgObj.content + component refs) + TUI.requestRender()
+ * 4. Send volatile message (renders in chat, never persisted)
+ * 5. Dual mutation (msgObj.content + component refs) + TUI.requestRender()
  */
 
 import {
@@ -17,11 +16,14 @@ import {
 } from '@earendil-works/pi-coding-agent';
 import type { TUI } from '@earendil-works/pi-tui';
 import { Box, Markdown, Spacer, Text } from '@earendil-works/pi-tui';
-
+import {
+	installVolatileCompactionMessagePatch,
+	LIVE_COMPACTION_STREAM_CUSTOM_TYPE,
+} from '@live-compaction/compaction/volatile-message';
 import type { HookContext, SummaryProgress } from '@live-compaction/types';
 import { safeUI } from '@live-compaction/types';
 
-const CUSTOM_TYPE = 'live-compaction-stream';
+const CUSTOM_TYPE = LIVE_COMPACTION_STREAM_CUSTOM_TYPE;
 const THROTTLE_MS = 150;
 
 /**
@@ -62,6 +64,8 @@ function buildHeaderText(
 export function registerCompactionChatMessage(
 	pi: ExtensionAPI,
 ): (ctx: HookContext) => SummaryProgress | undefined {
+	installVolatileCompactionMessagePatch();
+
 	const state: ChatState = {
 		phase: 'idle',
 		msgObj: null,
@@ -106,14 +110,8 @@ export function registerCompactionChatMessage(
 		),
 	}));
 
-	// ---- Hide on compaction commit (fires before rebuildChatFromMessages) ----
-	pi.on('session_compact', (_event, ctx) => {
-		const entry = ctx.sessionManager
-			.getEntries()
-			.findLast((e) => e.type === 'custom_message' && e.customType === CUSTOM_TYPE);
-		if (entry) (entry as { display: unknown }).display = undefined;
-
-		// Reset for next compaction cycle
+	// ---- Reset local renderer state before Pi rebuilds the compacted chat ----
+	pi.on('session_compact', () => {
 		state.phase = 'idle';
 		state.msgObj = null;
 		state.mdRef = null;
@@ -166,7 +164,7 @@ export function registerCompactionChatMessage(
 				const lineCount = text ? text.split('\n').length : 0;
 				ui.setWorkingMessage?.(`Compacting · ${lineCount} lines`);
 
-				// Dual mutation — rebuild-safe + immediate visual
+				// Dual mutation — model object + immediate visual
 				if (state.msgObj) {
 					state.msgObj.content = text;
 				}
