@@ -16,7 +16,7 @@ permissions:
 jobs:
   check:
     name: Typecheck and test
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, vps]
 
     steps:
       - name: Checkout
@@ -44,7 +44,7 @@ jobs:
 
   commitlint:
     name: Commitlint
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, vps]
     if: github.event_name == 'pull_request'
 
     steps:
